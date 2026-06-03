@@ -6,7 +6,16 @@
 
 ## Pre-trained Models
 
+📦 **ModelScope:** [SparkL/quantpilot](https://modelscope.cn/models/SparkL/quantpilot)
 📦 **HuggingFace:** [SPA3K/quantpilot-models](https://huggingface.co/SPA3K/quantpilot-models)
+
+```bash
+# 下载模型 (ModelScope)
+modelscope download --model SparkL/quantpilot --local_dir ~/.quantpilot/models/prebuilt
+
+# 下载模型 (HuggingFace)
+huggingface-cli download SPA3K/quantpilot-models --local-dir ~/.quantpilot/models/prebuilt
+```
 
 | 板块 | 股票数 | IC ↑ | IR ↑ | vs基线 | Top因子 | 状态 |
 |------|--------|------|------|--------|---------|------|
