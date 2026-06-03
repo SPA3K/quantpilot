@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantPilot — 量化策略交易平台</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #242836;
+  --border: #2d3148; --text: #e4e6ef; --dim: #8b8fa3;
+  --accent: #6c5ce7; --accent2: #a29bfe; --green: #00cec9; --red: #ff6b6b;
+  --orange: #fdcb6e; --radius: 12px; --font: 'Inter', -apple-system, system-ui, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font); line-height:1.6; }
+
+/* Layout */
+.app { max-width:1400px; margin:0 auto; padding:20px; }
+header { display:flex; align-items:center; justify-content:space-between; padding:16px 0 24px; border-bottom:1px solid var(--border); margin-bottom:24px; }
+.logo { font-size:24px; font-weight:700; }
+.logo span { color:var(--accent); }
+.tag { background:var(--accent); color:#fff; font-size:11px; padding:2px 8px; border-radius:20px; margin-left:8px; font-weight:600; }
+
+/* Grid layout */
+.builder-layout { display:grid; grid-template-columns:320px 1fr; gap:24px; }
+@media (max-width:900px) { .builder-layout { grid-template-columns:1fr; } }
+
+/* Cards */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.card h3 { font-size:14px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+
+/* Sidebar - Algorithm Catalog */
+.catalog { position:sticky; top:20px; max-height:calc(100vh - 40px); overflow-y:auto; }
+.catalog::-webkit-scrollbar { width:4px; }
+.catalog::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+.algo-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; cursor:grab; transition:all .2s; }
+.algo-card:hover { border-color:var(--accent); transform:translateX(4px); }
+.algo-card.buy { border-left:3px solid var(--green); }
+.algo-card.sell { border-left:3px solid var(--red); }
+.algo-card .name { font-weight:600; font-size:14px; }
+.algo-card .desc { font-size:12px; color:var(--dim); margin-top:4px; }
+.algo-card .tag-sm { font-size:10px; padding:1px 6px; border-radius:4px; }
+.algo-card .tag-buy { background:rgba(0,206,201,.15); color:var(--green); }
+.algo-card .tag-sell { background:rgba(255,107,107,.15); color:var(--red); }
+.algo-card .params-preview { font-size:11px; color:var(--dim); margin-top:6px; }
+
+/* Main area */
+.main-area { min-width:0; }
+
+/* Tabs */
+.tabs { display:flex; gap:4px; margin-bottom:20px; background:var(--surface); border-radius:8px; padding:4px; border:1px solid var(--border); }
+.tab { flex:1; text-align:center; padding:10px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; color:var(--dim); transition:all .2s; }
+.tab.active { background:var(--accent); color:#fff; }
+.tab:hover:not(.active) { color:var(--text); }
+
+/* Strategy Builder */
+.strategy-slots { margin-bottom:20px; }
+.slot-group { margin-bottom:16px; }
+.slot-label { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; color:var(--dim); }
+.slot-label.buy-label { color:var(--green); }
+.slot-label.sell-label { color:var(--red); }
+.slot-area { min-height:60px; background:var(--surface2); border:2px dashed var(--border); border-radius:8px; padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+.slot-area.drag-over { border-color:var(--accent); background:rgba(108,92,231,.05); }
+.slot-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px; position:relative; min-width:200px; }
+.slot-item.buy-slot { border-left:3px solid var(--green); }
+.slot-item.sell-slot { border-left:3px solid var(--red); }
+.slot-item .slot-name { font-weight:600; font-size:13px; }
+.slot-item .remove-btn { position:absolute; top:6px; right:8px; background:none; border:none; color:var(--dim); cursor:pointer; font-size:16px; }
+.slot-item .remove-btn:hover { color:var(--red); }
+
+/* Param sliders */
+.param-row { display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; }
+.param-row label { min-width:70px; color:var(--dim); }
+.param-row input[type=range] { flex:1; accent-color:var(--accent); }
+.param-row .param-val { min-width:50px; text-align:right; font-family:monospace; color:var(--accent2); }
+
+/* Config panel */
+.config-panel { margin-top:16px; }
+.config-row { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.config-field { display:flex; flex-direction:column; gap:4px; }
+.config-field label { font-size:12px; color:var(--dim); }
+.config-field input, .config-field select { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:8px 12px; color:var(--text); font-size:14px; }
+.config-field input:focus, .config-field select:focus { outline:none; border-color:var(--accent); }
+
+/* Stock selector */
+.stock-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.stock-chip { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:12px; cursor:pointer; transition:all .2s; }
+.stock-chip.selected { background:var(--accent); border-color:var(--accent); color:#fff; }
+.stock-chip:hover:not(.selected) { border-color:var(--accent2); }
+
+/* Run button */
+.run-btn { width:100%; padding:14px; background:linear-gradient(135deg, var(--accent), #8b5cf6); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; margin-top:16px; transition:all .2s; }
+.run-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(108,92,231,.3); }
+.run-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* Results */
+.results-panel { display:none; }
+.results-panel.show { display:block; }
+.metrics-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:24px; }
+.metric-card { background:var(--surface2); border-radius:8px; padding:16px; text-align:center; }
+.metric-card .metric-value { font-size:28px; font-weight:700; }
+.metric-card .metric-label { font-size:12px; color:var(--dim); margin-top:4px; }
+.metric-card.positive .metric-value { color:var(--green); }
+.metric-card.negative .metric-value { color:var(--red); }
+.metric-card.neutral .metric-value { color:var(--accent2); }
+
+.chart-container { background:var(--surface2); border-radius:8px; padding:20px; margin-bottom:24px; position:relative; height:350px; }
+
+/* Trade table */
+.trade-table { width:100%; border-collapse:collapse; font-size:13px; }
+.trade-table th { background:var(--surface2); padding:10px 12px; text-align:left; font-weight:600; font-size:12px; color:var(--dim); text-transform:uppercase; letter-spacing:.5px; position:sticky; top:0; }
+.trade-table td { padding:8px 12px; border-bottom:1px solid var(--border); }
+.trade-table tr:hover td { background:var(--surface2); }
+.trade-table .buy-text { color:var(--green); font-weight:600; }
+.trade-table .sell-text { color:var(--red); font-weight:600; }
+.trade-table .pnl-pos { color:var(--green); }
+.trade-table .pnl-neg { color:var(--red); }
+.table-wrap { max-height:400px; overflow-y:auto; border-radius:8px; border:1px solid var(--border); }
+
+/* Loading */
+.loading { display:none; text-align:center; padding:40px; }
+.loading.show { display:block; }
+.spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 20px; color:var(--dim); }
+.empty-state .icon { font-size:48px; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">Quant<span>Pilot</span> <span class="tag">v0.3</span></div>
+    <div style="color:var(--dim);font-size:13px">量化策略交易平台 · 12个免费策略积木</div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('build')">🔧 搭建策略</div>
+    <div class="tab" onclick="switchTab('results')">📊 回测结果</div>
+    <div class="tab" onclick="switchTab('catalog')">📚 组件手册</div>
+  </div>
+
+  <!-- Tab: Build Strategy -->
+  <div id="tab-build">
+    <div class="builder-layout">
+      <!-- Sidebar: Algorithm Catalog -->
+      <div class="card catalog">
+        <h3>策略积木库</h3>
+        <div style="margin-bottom:12px">
+          <input type="text" id="algo-search" placeholder="搜索组件..."
+                 style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px"
+                 oninput="filterAlgos(this.value)">
+        </div>
+        <div id="algo-list"></div>
+      </div>
+
+      <!-- Main: Strategy Builder -->
+      <div class="main-area">
+        <!-- Buy Signals -->
+        <div class="card strategy-slots">
+          <div class="slot-group">
+            <div class="slot-label buy-label">📈 买入信号（拖入或点击左侧组件）</div>
+            <div class="slot-area" id="buy-slots"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="dropAlgo(event,'buy')">
+              <div class="empty-state" id="buy-empty" style="width:100%">
+                <div class="icon">🎯</div>
+                点击左侧买入组件添加到这里
+              </div>
+            </div>
+          </div>
+
+          <div class="slot-group">
+            <div class="slot-label sell-label">📉 卖出/止损（可选）</div>
+            <div class="slot-area" id="sell-slots"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="dropAlgo(event,'sell')">
+              <div class="empty-state" id="sell-empty" style="width:100%">
+                <div class="icon">🛡️</div>
+                添加止盈/止损或其他卖出信号
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock & Config -->
+        <div class="card config-panel">
+          <h3>回测配置</h3>
+          <div class="config-row">
+            <div class="config-field" style="flex:1">
+              <label>起始日期</label>
+              <input type="date" id="start-date" value="2024-01-01">
+            </div>
+            <div class="config-field" style="flex:1">
+              <label>结束日期</label>
+              <input type="date" id="end-date" value="2025-12-31">
+            </div>
+            <div class="config-field" style="flex:1">
+              <label>初始资金</label>
+              <input type="number" id="capital" value="100000" step="10000">
+            </div>
+            <div class="config-field" style="flex:1">
+              <label>仓位模式</label>
+              <select id="position-mode" onchange="togglePositionMode()">
+                <option value="fixed">固定金额</option>
+                <option value="percent">按比例</option>
+              </select>
+            </div>
+            <div class="config-field" style="flex:1" id="pos-size-field">
+              <label>每笔金额</label>
+              <input type="number" id="position-size" value="50000" step="10000">
+            </div>
+          </div>
+
+          <div style="margin-top:8px">
+            <label style="font-size:12px;color:var(--dim)">选择股票（点击选中/取消）</label>
+            <div class="stock-chips" id="stock-chips"></div>
+          </div>
+
+          <button class="run-btn" id="run-btn" onclick="runBacktest()">
+            🚀 运行回测
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Results -->
+  <div id="tab-results" style="display:none">
+    <div class="results-panel show" id="results-panel">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>正在拉取数据并运行回测...</div>
+      </div>
+      <div id="results-content" style="display:none">
+        <div class="metrics-grid" id="metrics-grid"></div>
+        <div class="chart-container">
+          <canvas id="equity-chart"></canvas>
+        </div>
+        <div class="card">
+          <h3>交易记录</h3>
+          <div class="table-wrap">
+            <table class="trade-table">
+              <thead>
+                <tr>
+                  <th>日期</th><th>股票</th><th>方向</th><th>股数</th>
+                  <th>价格</th><th>手续费</th><th>盈亏</th><th>原因</th>
+                </tr>
+              </thead>
+              <tbody id="trade-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="no-results" class="empty-state">
+        <div class="icon">📊</div>
+        <div>还没有回测结果<br>去「搭建策略」tab创建你的第一个策略吧</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Catalog -->
+  <div id="tab-catalog" style="display:none">
+    <div class="card">
+      <h3>策略积木手册</h3>
+      <div id="catalog-detail"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let algorithms = [];
+let stocks = [];
+let buySlots = [];  // [{algo, params}]
+let sellSlots = [];
+let lastResult = null;
+let equityChart = null;
+
+// ── Init ──
+async function init() {
+  const [algoRes, stockRes] = await Promise.all([
+    fetch('/api/algorithms').then(r => r.json()),
+    fetch('/api/stocks').then(r => r.json()),
+  ]);
+  algorithms = algoRes;
+  stocks = stockRes;
+  renderAlgoList();
+  renderStockChips();
+  renderCatalogDetail();
+}
+
+// ── Algorithm List ──
+function renderAlgoList(filter='') {
+  const el = document.getElementById('algo-list');
+  const f = filter.toLowerCase();
+  el.innerHTML = algorithms
+    .filter(a => !f || a.name.includes(f) || a.description.includes(f))
+    .map((a, i) => `
+      <div class="algo-card ${a.category}" draggable="true"
+           ondragstart="event.dataTransfer.setData('text/plain','${a.name}')"
+           onclick="clickAlgo('${a.name}')">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="name">${a.name}</span>
+          <span class="tag-sm tag-${a.category}">${a.category === 'buy' ? '买入' : '卖出'}</span>
+        </div>
+        <div class="desc">${a.description}</div>
+        <div class="params-preview">
+          ${a.params.map(p => p.name + '=' + p.default).join(', ')}
+        </div>
+      </div>
+    `).join('');
+}
+
+function filterAlgos(v) { renderAlgoList(v); }
+
+function clickAlgo(name) {
+  const algo = algorithms.find(a => a.name === name);
+  if (!algo) return;
+  const target = algo.category === 'sell' ? 'sell' : 'buy';
+  addSlot(name, target);
+}
+
+function dropAlgo(event, target) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  const name = event.dataTransfer.getData('text/plain');
+  addSlot(name, target);
+}
+
+function addSlot(name, target) {
+  const algo = algorithms.find(a => a.name === name);
+  if (!algo) return;
+  const params = {};
+  algo.params.forEach(p => params[p.name] = p.default);
+
+  if (target === 'buy') {
+    buySlots.push({ algo: name, params });
+    document.getElementById('buy-empty').style.display = 'none';
+    renderSlots('buy');
+  } else {
+    sellSlots.push({ algo: name, params });
+    document.getElementById('sell-empty').style.display = 'none';
+    renderSlots('sell');
+  }
+}
+
+function removeSlot(target, index) {
+  if (target === 'buy') {
+    buySlots.splice(index, 1);
+    if (!buySlots.length) document.getElementById('buy-empty').style.display = '';
+  } else {
+    sellSlots.splice(index, 1);
+    if (!sellSlots.length) document.getElementById('sell-empty').style.display = '';
+  }
+  renderSlots(target);
+}
+
+function renderSlots(target) {
+  const container = document.getElementById(target + '-slots');
+  const empty = document.getElementById(target + '-empty');
+  const slots = target === 'buy' ? buySlots : sellSlots;
+
+  // Remove existing slot-items
+  container.querySelectorAll('.slot-item').forEach(el => el.remove());
+
+  slots.forEach((slot, i) => {
+    const algo = algorithms.find(a => a.name === slot.algo);
+    const div = document.createElement('div');
+    div.className = `slot-item ${target}-slot`;
+    div.innerHTML = `
+      <button class="remove-btn" onclick="removeSlot('${target}',${i})">✕</button>
+      <div class="slot-name">${slot.algo}</div>
+      ${algo.params.map(p => `
+        <div class="param-row">
+          <label>${p.description || p.name}</label>
+          <input type="range" min="${p.min}" max="${p.max}"
+                 step="${p.type === 'int' ? 1 : 0.01}"
+                 value="${slot.params[p.name]}"
+                 oninput="updateParam('${target}',${i},'${p.name}',this.value)">
+          <span class="param-val" id="pv-${target}-${i}-${p.name}">${slot.params[p.name]}</span>
+        </div>
+      `).join('')}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateParam(target, index, paramName, value) {
+  const slot = (target === 'buy' ? buySlots : sellSlots)[index];
+  const algo = algorithms.find(a => a.name === slot.algo);
+  const paramDef = algo.params.find(p => p.name === paramName);
+  slot.params[paramName] = paramDef.type === 'int' ? parseInt(value) : parseFloat(value);
+  document.getElementById(`pv-${target}-${index}-${paramName}`).textContent = slot.params[paramName];
+}
+
+// ── Stock Chips ──
+function renderStockChips() {
+  const el = document.getElementById('stock-chips');
+  el.innerHTML = stocks.map(s => `
+    <div class="stock-chip" onclick="toggleStock(this,'${s.name}')">${s.name}</div>
+  `).join('');
+}
+
+function toggleStock(el, name) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedStocks() {
+  return [...document.querySelectorAll('.stock-chip.selected')].map(el => el.textContent);
+}
+
+function togglePositionMode() {
+  const mode = document.getElementById('position-mode').value;
+  document.getElementById('pos-size-field').innerHTML = mode === 'fixed'
+    ? '<label>每笔金额</label><input type="number" id="position-size" value="50000" step="10000">'
+    : '<label>仓位比例</label><input type="number" id="position-size" value="0.3" step="0.1" min="0.05" max="1">';
+}
+
+// ── Run Backtest ──
+async function runBacktest() {
+  const selectedStocks = getSelectedStocks();
+  if (!selectedStocks.length) { alert('请至少选择一只股票'); return; }
+  if (!buySlots.length) { alert('请至少添加一个买入信号组件'); return; }
+
+  switchTab('results');
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('results-content').style.display = 'none';
+  document.getElementById('no-results').style.display = 'none';
+
+  const posMode = document.getElementById('position-mode').value;
+  const posVal = parseFloat(document.getElementById('position-size').value);
+
+  const body = {
+    stocks: selectedStocks,
+    start: document.getElementById('start-date').value,
+    end: document.getElementById('end-date').value,
+    initial_capital: parseFloat(document.getElementById('capital').value),
+    buy_algorithms: buySlots.map(s => ({ name: s.algo, params: s.params })),
+    sell_algorithms: sellSlots.map(s => ({ name: s.algo, params: s.params })),
+    position_mode: posMode,
+    position_size: posMode === 'fixed' ? posVal : 50000,
+    position_percent: posMode === 'percent' ? posVal : 0.3,
+  };
+
+  try {
+    const res = await fetch('/api/backtest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Backtest failed');
+    }
+    lastResult = await res.json();
+    renderResults(lastResult);
+  } catch (e) {
+    alert('回测失败: ' + e.message);
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+// ── Render Results ──
+function renderResults(data) {
+  document.getElementById('no-results').style.display = 'none';
+  document.getElementById('results-content').style.display = '';
+
+  // Metrics
+  const m = data.metrics;
+  const metricsHtml = [
+    { label: '总收益', value: m.total_return + '%', cls: m.total_return >= 0 ? 'positive' : 'negative' },
+    { label: '年化收益', value: m.annual_return + '%', cls: m.annual_return >= 0 ? 'positive' : 'negative' },
+    { label: '最大回撤', value: m.max_drawdown + '%', cls: 'negative' },
+    { label: '夏普比', value: m.sharpe_ratio, cls: m.sharpe_ratio >= 1 ? 'positive' : m.sharpe_ratio >= 0 ? 'neutral' : 'negative' },
+    { label: '胜率', value: m.win_rate + '%', cls: m.win_rate >= 50 ? 'positive' : 'neutral' },
+    { label: '盈亏比', value: m.profit_loss_ratio + ':1', cls: m.profit_loss_ratio >= 1.5 ? 'positive' : 'neutral' },
+    { label: '交易次数', value: m.total_trades, cls: 'neutral' },
+    { label: '平均持仓', value: m.avg_holding_days + '天', cls: 'neutral' },
+    { label: '期末资金', value: '¥' + m.final_capital.toLocaleString(), cls: m.final_capital >= m.initial_capital ? 'positive' : 'negative' },
+  ];
+  document.getElementById('metrics-grid').innerHTML = metricsHtml.map(m =>
+    `<div class="metric-card ${m.cls}"><div class="metric-value">${m.value}</div><div class="metric-label">${m.label}</div></div>`
+  ).join('');
+
+  // Equity Chart
+  if (equityChart) equityChart.destroy();
+  const ctx = document.getElementById('equity-chart').getContext('2d');
+  const eqData = data.equity_curve;
+  equityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: eqData.map(d => d.date),
+      datasets: [{
+        label: '净值曲线',
+        data: eqData.map(d => d.value),
+        borderColor: '#6c5ce7',
+        backgroundColor: 'rgba(108,92,231,.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: true, ticks: { maxTicksLimit: 10, color: '#8b8fa3', font: { size: 11 } }, grid: { color: '#2d3148' } },
+        y: { ticks: { color: '#8b8fa3', font: { size: 11 }, callback: v => '¥' + v.toLocaleString() }, grid: { color: '#2d3148' } },
+      },
+    },
+  });
+
+  // Trades Table
+  document.getElementById('trade-body').innerHTML = data.trades.map(t => `
+    <tr>
+      <td>${t.date}</td>
+      <td>${t.ticker}</td>
+      <td class="${t.action === 'buy' ? 'buy-text' : 'sell-text'}">${t.action === 'buy' ? '买入' : '卖出'}</td>
+      <td>${t.shares}</td>
+      <td>¥${t.price}</td>
+      <td>¥${t.commission}</td>
+      <td class="${t.pnl >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.pnl >= 0 ? '+' : ''}¥${t.pnl.toLocaleString()}</td>
+      <td style="font-size:12px;color:var(--dim)">${t.reason}</td>
+    </tr>
+  `).join('');
+
+  switchTab('results');
+}
+
+// ── Catalog Detail ──
+function renderCatalogDetail() {
+  document.getElementById('catalog-detail').innerHTML = algorithms.map(a => `
+    <div style="margin-bottom:24px;padding:16px;background:var(--surface2);border-radius:8px;border-left:3px solid ${a.category === 'buy' ? 'var(--green)' : 'var(--red)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:18px;font-weight:600">${a.name}</div>
+        <span class="tag-sm tag-${a.category}">${a.category === 'buy' ? '买入信号' : '卖出信号'}</span>
+      </div>
+      <div style="color:var(--dim);margin-bottom:12px">${a.description}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">参数说明:</div>
+      ${a.params.map(p => `
+        <div style="display:flex;gap:12px;font-size:13px;margin-bottom:4px">
+          <span style="min-width:100px;color:var(--accent2);font-family:monospace">${p.name}</span>
+          <span style="min-width:80px;color:var(--dim)">默认 ${p.default}</span>
+          <span style="min-width:100px;color:var(--dim)">范围 ${p.min} ~ ${p.max}</span>
+          <span>${p.description}</span>
+        </div>
+      `).join('')}
+      <div style="margin-top:12px">
+        <button onclick="clickAlgo('${a.name}')" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 16px;cursor:pointer;font-size:13px">
+          + 添加到策略
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['build', 'results', 'catalog'][i] === name);
+  });
+  document.getElementById('tab-build').style.display = name === 'build' ? '' : 'none';
+  document.getElementById('tab-results').style.display = name === 'results' ? '' : 'none';
+  document.getElementById('tab-catalog').style.display = name === 'catalog' ? '' : 'none';
+}
+
+// ── Boot ──
+init();
+</script>
+</body>
+</html>

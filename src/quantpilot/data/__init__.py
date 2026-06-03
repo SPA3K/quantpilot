@@ -1,25 +1,35 @@
-"""Data layer — fetching, caching, and sector management."""
+"""Data provider interface."""
 
-from quantpilot.data.cache import DataCache
-from quantpilot.data.fetcher import (
-    get_stock_daily,
-    get_stock_financial,
-    get_north_flow,
-    get_sector_stocks,
-)
-from quantpilot.data.sectors import (
-    resolve_sector,
-    get_sector_stocks_cached,
-    list_all_sectors,
-)
+from abc import ABC, abstractmethod
+import pandas as pd
 
-__all__ = [
-    "DataCache",
-    "get_stock_daily",
-    "get_stock_financial",
-    "get_north_flow",
-    "get_sector_stocks",
-    "resolve_sector",
-    "get_sector_stocks_cached",
-    "list_all_sectors",
-]
+
+class DataProvider(ABC):
+    """数据提供者接口"""
+
+    @abstractmethod
+    def get_bars(
+        self,
+        ticker: str,
+        start: str,
+        end: str,
+        freq: str = "daily",
+    ) -> pd.DataFrame:
+        """
+        获取OHLCV数据。
+
+        Args:
+            ticker: 股票代码或名称
+            start: 起始日期 "YYYY-MM-DD"
+            end: 结束日期 "YYYY-MM-DD"
+            freq: "daily" | "minute"
+
+        Returns:
+            DataFrame with columns: [date, open, high, low, close, volume, turnover]
+        """
+        ...
+
+    @abstractmethod
+    def resolve_ticker(self, name: str) -> str:
+        """将股票名称解析为代码"""
+        ...

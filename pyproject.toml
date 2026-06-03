@@ -1,45 +1,35 @@
 [project]
 name = "quantpilot"
-version = "0.1.0"
-description = "AI-Powered Investment Research Workbench for A-Share Market"
+version = "0.3.0"
+description = "量化交易的乐高积木 — 用户选股、搭策略、跑回测、接券商"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 
 dependencies = [
-    # MCP
-    "mcp>=1.0",
-    "fastmcp>=2.0",
-    
-    # ML
-    "lightgbm>=4.3",
-    "shap>=0.45",
-    "optuna>=3.6",
-    
     # Data
-    "akshare>=1.14",
-    "pandas>=2.2",
-    "numpy>=1.26",
-    "pyarrow>=15.0",
-    
-    # Utils
-    "pydantic>=2.7",
-    "rich>=13.7",
+    "baostock>=0.9",
+    "pandas>=2.0",
+    "numpy>=1.24",
+
+    # Web
+    "fastapi>=0.100",
+    "uvicorn>=0.23",
 ]
 
 [project.optional-dependencies]
-web = [
-    "fastapi>=0.111",
-    "uvicorn>=0.30",
+ml = [
+    "lightgbm>=4.0",
+    "shap>=0.42",
+    "scikit-learn>=1.3",
 ]
 dev = [
-    "pytest>=8.2",
-    "ruff>=0.4",
+    "pytest>=7.4",
+    "ruff>=0.1",
 ]
 
 [project.scripts]
-quantpilot-mcp = "quantpilot.mcp_server:main"
-quantpilot-train = "quantpilot.cli_train:main"
+quantpilot-demo = "examples.simple_ma:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -50,7 +40,7 @@ packages = ["src/quantpilot"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py311"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

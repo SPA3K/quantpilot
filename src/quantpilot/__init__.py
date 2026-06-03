@@ -1,3 +1,2 @@
-"""QuantPilot — AI-Powered Investment Research Workbench for A-Share Market."""
-
-__version__ = "0.1.0"
+"""QuantPilot — 量化交易的乐高积木"""
+__version__ = "0.2.0"
