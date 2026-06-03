@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Model files (large, 版权数据)
+models/prebuilt/
+models/custom/
+*.lgb
+*.pkl
+
+# Data cache
+cache/
+~/.quantpilot/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+.ipynb_checkpoints/
