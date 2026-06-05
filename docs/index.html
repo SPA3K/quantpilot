@@ -82,6 +82,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
   <div class="tab" onclick="switchTab('presets')">⭐ 策略预设</div>
   <div class="tab" onclick="switchTab('results')">📊 回测结果</div>
   <div class="tab" onclick="switchTab('catalog')">📚 组件手册</div>
+  <div class="tab" onclick="switchTab('guide')">📖 指标详解</div>
 </div>
 
 <div id="tab-build">
@@ -143,6 +144,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
   </div>
 </div>
 
+<div id="tab-guide" style="display:none"><div class="card" id="guide-content"></div></div>
+
 <div id="tab-catalog" style="display:none">
   <div class="card"><h3>策略积木手册</h3><div id="catalog-detail"></div></div>
 </div>
@@ -169,7 +172,7 @@ const PRESETS={"双均线+止损":{"name":"双均线+止损","desc":"经典趋�
 
 let buySlots=[],sellSlots=[],chart=null;
 
-function init(){renderAlgos();renderStocks();renderPresets();renderCatalog()}
+function init(){renderAlgos();renderStocks();renderPresets();renderCatalog();renderGuide()}
 
 function renderAlgos(f=''){
   const el=document.getElementById('algo-list');const q=f.toLowerCase();
@@ -303,13 +306,121 @@ function renderCatalog(){
 
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(t,i){
-    t.classList.toggle('active',['build','presets','results','catalog'][i]===n);
+    t.classList.toggle('active',['build','presets','results','catalog','guide'][i]===n);
   });
-  ['build','presets','results','catalog'].forEach(function(id){
+  ['build','presets','results','catalog','guide'].forEach(function(id){
     document.getElementById('tab-'+id).style.display=id===n?'':'none';
   });
 }
 
+
+function renderGuide(){
+  var guides=[
+    {name:'双均线交叉',icon:'📈',type:'趋势跟踪',
+     logic:'计算短期均线（如5日）和长期均线（如20日）。当短均线从下往上穿越长均线（金叉），说明短期动量转强，买入；反之（死叉）卖出。',
+     params:[
+       {n:'fast_period',v:'5',explain:'短均线周期。越小越敏感，频繁交易但假信号多；越大越迟钝但更稳。常用3-10。'},
+       {n:'slow_period',v:'20',explain:'长均线周期。代表中期趋势方向。常用15-60。两者间距越大，信号越少但越可靠。'}
+     ],
+     tip:'经典用法：5/20日均线用于短线，10/60用于中线。牛市中表现好，震荡市容易被反复打脸。'},
+    {name:'RSI超买超卖',icon:'📊',type:'震荡指标',
+     logic:'RSI衡量最近N天内上涨幅度占总波动的比例。RSI<30说明跌多了可能反弹（超卖）；RSI>70说明涨多了可能回调（超买）。',
+     params:[
+       {n:'period',v:'14',explain:'计算周期。14天是经典值。周期越短RSI波动越大，信号越多但噪音也多。'},
+       {n:'oversold',v:'30',explain:'超卖阈值。RSI低于此值视为超卖，准备买入。越低信号越少但越准。'},
+       {n:'overbought',v:'70',explain:'超买阈值。RSI高于此值视为超买，准备卖出。与oversold对称使用。'}
+     ],
+     tip:'单边下跌行情中RSI可能长期低于30，光靠RSI抄底会亏很多。建议配合趋势指标过滤。'},
+    {name:'MACD',icon:'📉',type:'趋势+动量',
+     logic:'DIF=12日EMA - 26日EMA（快慢均线差），DEA=DIF的9日平滑线。DIF上穿DEA（金叉）=买入，下穿（死叉）=卖出。',
+     params:[
+       {n:'fast_period',v:'12',explain:'快线EMA周期。控制DIF的灵敏度。'},
+       {n:'slow_period',v:'26',explain:'慢线EMA周期。与快线之差反映趋势强度。'},
+       {n:'signal_period',v:'9',explain:'信号线周期。DEA的平滑程度，越大信号越滞后但越稳。'}
+     ],
+     tip:'MACD是最经典的趋势指标。零轴上方金叉比下方金叉更可靠。柱状图（DIF-DEA）缩短表示趋势减弱。'},
+    {name:'布林带',icon:'🎯',type:'波动率通道',
+     logic:'中轨=N日均线，上下轨=中轨±K倍标准差。价格触及下轨=可能超跌（买入），触及上轨=可能超涨（卖出）。',
+     params:[
+       {n:'period',v:'20',explain:'均线周期。20日是标准值，代表一个月的交易日。'},
+       {n:'num_std',v:'2.0',explain:'标准差倍数。2.0约覆盖95%的价格波动。越大通道越宽，信号越少。'}
+     ],
+     tip:'布林带收口（带宽变窄）往往预示大行情即将到来。适合配合其他指标使用。'},
+    {name:'KDJ',icon:'⚡',type:'超买超卖',
+     logic:'基于随机指标，K线=D值的平滑。K上穿D=买入信号，K下穿D=卖出信号。比RSI更敏感。',
+     params:[
+       {n:'period',v:'9',explain:'RSV计算周期。9天是标准值。'},
+       {n:'k_smooth',v:'3',explain:'K线平滑系数。越大K线越平滑，信号越少。'},
+       {n:'d_smooth',v:'3',explain:'D线平滑系数。D是K的均线，控制信号延迟。'}
+     ],
+     tip:'KDJ在震荡行情中表现好，但单边行情容易钝化（长期停留在超买/超卖区）。A股用得很多。'},
+    {name:'海龟交易法',icon:'🐢',type:'突破策略',
+     logic:'价格突破N日最高价=趋势启动买入；跌破M日最低价=趋势结束卖出。纯趋势跟踪，不抄底不逃顶。',
+     params:[
+       {n:'entry_period',v:'20',explain:'入场突破周期。20日是经典值（唐奇安通道）。越大信号越少但趋势确认越强。'},
+       {n:'exit_period',v:'10',explain:'出场周期。通常设为入场的一半，更快止损。'}
+     ],
+     tip:'海龟交易法的核心是截断亏损，让利润奔跑。配合ATR仓位管理效果更好。'},
+    {name:'量价配合',icon:'📊',type:'量价分析',
+     logic:'放量（成交量/N日均量 > 阈值）+上涨（涨幅>阈值）=主力进场买入；反之缩量滞涨=卖出。',
+     params:[
+       {n:'volume_ratio',v:'1.5',explain:'量比阈值。1.5倍表示成交量是近期均量的1.5倍。越大条件越苛刻。'},
+       {n:'price_change',v:'0.02',explain:'最小涨幅。0.02=2%。当日涨幅需超过此值才触发。'}
+     ],
+     tip:'量价配合是技术分析的基本功。量在价先——成交量放大往往先于价格变动。'},
+    {name:'OBV能量潮',icon:'🌊',type:'量能指标',
+     logic:'每天收盘涨则OBV=前一天OBV+成交量；跌则减去成交量。OBV持续上升=资金流入，下降=资金流出。',
+     params:[
+       {n:'obv_period',v:'20',explain:'OBV均线周期。用OBV与其均线的交叉判断趋势。'}
+     ],
+     tip:'OBV创新高但价格没创新高=底背离（看涨）；OBV创新低但价格没创新低=顶背离（看跌）。'},
+    {name:'网格交易',icon:'🔲',type:'均值回归',
+     logic:'在当前价格上下各挂N格买卖单。跌一格买一份，涨一格卖一份。适合震荡行情反复赚差价。',
+     params:[
+       {n:'grid_pct',v:'3.0',explain:'网格间距百分比。3%表示每格3%的价差。越小交易越频繁。'},
+       {n:'grid_levels',v:'5',explain:'网格层数。5层=上下各5格。越多资金利用率越高但风险越大。'}
+     ],
+     tip:'网格交易最怕单边下跌——会不断买入直到满仓被套。务必设置总仓位上限。'},
+    {name:'ATR追踪止损',icon:'🛡️',type:'风控',
+     logic:'ATR=平均真实波幅。止损线=最高价 - N倍ATR。价格回撤超过ATR倍数时卖出，保护利润。',
+     params:[
+       {n:'atr_period',v:'14',explain:'ATR计算周期。14天是标准值。'},
+       {n:'atr_mult',v:'2.0',explain:'ATR倍数。2倍=止损线距离最高价2个ATR。越大止损越宽，给趋势更多空间。'}
+     ],
+     tip:'这是趋势策略的最佳搭档。比固定百分比止损更灵活——波动大时自动放宽，波动小时自动收紧。'},
+    {name:'止盈',icon:'💰',type:'风控',
+     logic:'当持仓收益达到目标百分比时自动卖出锁定利润。',
+     params:[
+       {n:'take_profit_pct',v:'10',explain:'止盈目标。10%表示赚10%就卖。越高潜在收益越大但回吐风险也越大。'}
+     ],
+     tip:'止盈和止损要配合使用。建议止盈:止损 >= 2:1（赚2块才冒亏1块的风险）。'},
+    {name:'止损',icon:'⛔',type:'风控',
+     logic:'当持仓亏损达到阈值时自动卖出截断损失。这是最重要的风控手段。',
+     params:[
+       {n:'stop_loss_pct',v:'5',explain:'止损阈值。5%表示亏5%就卖。越小单笔亏损越小但被震出去的概率越大。'}
+     ],
+     tip:'没有止损的交易等于赌博。5%止损意味着连续亏20次才亏光，但不设止损一次就可能亏50%。'}
+  ];
+  document.getElementById('guide-content').innerHTML='<h3>指标参数详解</h3>'+
+    guides.map(function(g){
+      return '<div style="margin-bottom:28px;padding:20px;background:var(--sf2);border-radius:12px;border-left:4px solid var(--ac)">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'+
+        '<span style="font-size:28px">'+g.icon+'</span>'+
+        '<div><div style="font-size:18px;font-weight:700">'+g.name+'</div>'+
+        '<div style="font-size:12px;color:var(--a2)">'+g.type+'</div></div></div>'+
+        '<div style="background:rgba(108,92,231,.08);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.8">'+
+        '<div style="font-weight:600;color:var(--ac);margin-bottom:4px">📌 交易逻辑</div>'+g.logic+'</div>'+
+        '<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--dm)">参数说明</div>'+
+        g.params.map(function(p){
+          return '<div style="display:flex;gap:12px;font-size:13px;margin-bottom:8px;padding:8px 12px;background:var(--sf);border-radius:6px">'+
+            '<code style="color:var(--a2);min-width:90px;font-weight:600">'+p.n+'</code>'+
+            '<div><span style="color:var(--gn)">默认: '+p.v+'</span> — '+p.explain+'</div></div>';
+        }).join('')+
+        '<div style="margin-top:12px;padding:10px 14px;background:rgba(253,203,110,.08);border-radius:8px;font-size:12px;color:var(--or);line-height:1.7">'+
+        '💡 <b>实战提示：</b>'+g.tip+'</div>'+
+        '</div>';
+    }).join('');
+}
 init();
 </script>
 </body>
