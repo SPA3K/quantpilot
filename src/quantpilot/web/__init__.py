@@ -199,6 +199,43 @@ def run_backtest(req: BacktestRequest):
         raise HTTPException(500, f"Backtest failed: {str(e)}")
 
 
+# ── Demo Presets (pre-computed offline results) ──
+_DEMO_STRATEGIES_PATH = Path(__file__).parent.parent.parent.parent / "data" / "demo" / "strategies.json"
+_demo_strategies_cache = None
+
+def _load_demo_strategies():
+    global _demo_strategies_cache
+    if _demo_strategies_cache is None and _DEMO_STRATEGIES_PATH.exists():
+        with open(_DEMO_STRATEGIES_PATH) as f:
+            _demo_strategies_cache = json.load(f)
+    return _demo_strategies_cache or {}
+
+
+@app.get("/api/demo/presets")
+def list_demo_presets():
+    """列出所有预生成的demo策略（仅返回摘要，不含曲线/交易明细）"""
+    strategies = _load_demo_strategies()
+    presets = []
+    for key, s in strategies.items():
+        presets.append({
+            "id": key,
+            "name": s["name"],
+            "desc": s["desc"],
+            "stocks": s["stocks"],
+            "metrics": s["metrics"],
+        })
+    return presets
+
+
+@app.get("/api/demo/backtest/{strategy_id}")
+def get_demo_backtest(strategy_id: str):
+    """返回某个预生成策略的完整回测结果（含净值曲线+交易记录）"""
+    strategies = _load_demo_strategies()
+    if strategy_id not in strategies:
+        raise HTTPException(404, f"Strategy '{strategy_id}' not found in demo presets")
+    return strategies[strategy_id]
+
+
 # ── Serve Frontend ──
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
