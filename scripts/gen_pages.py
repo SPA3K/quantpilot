@@ -278,7 +278,7 @@ function showResult(d,title){
     data:{labels:eq.map(function(p){return p.date}),datasets:[{label:'净值',data:eq.map(function(p){return p.value}),borderColor:'#6c5ce7',backgroundColor:'rgba(108,92,231,.1)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{ticks:{maxTicksLimit:10,color:'#8b8fa3',font:{size:11}},grid:{color:'#2d3148'}},
-        y:{ticks:{color:'#8b8fa3',callback:function(v){return '¥'+v.toLocaleString()}},grid:{color:'#2d3148'}}}}}
+        y:{ticks:{color:'#8b8fa3',callback:function(v){return '¥'+v.toLocaleString()}},grid:{color:'#2d3148'}}}}
   });
   switchTab('results');
 }
