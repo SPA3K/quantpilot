@@ -86,6 +86,45 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .preset-metrics{display:flex;gap:16px;flex-wrap:wrap}
 .preset-metrics span{font-size:13px}.preset-metrics .pos{color:var(--gn)}.preset-metrics .neg{color:var(--rd)}
 .empty-state{text-align:center;padding:40px;color:var(--dm)}.empty-state .icon{font-size:48px;margin-bottom:12px}
+/* Simulator Styles */
+.sim-section{background:linear-gradient(135deg,rgba(108,92,231,.12),rgba(0,206,201,.06));border:2px solid var(--ac);border-radius:var(--r);padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.sim-section::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle at 70% 30%,rgba(108,92,231,.06),transparent 50%);pointer-events:none}
+.sim-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sim-header h3{font-size:18px;font-weight:700;color:var(--a2);margin:0}
+.sim-header .badge{background:linear-gradient(135deg,var(--ac),#8b5cf6);color:#fff;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;letter-spacing:1px;animation:pulse-badge 2s infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.7}}
+.sim-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px}
+.sim-ctrl{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.sim-ctrl label{display:block;font-size:11px;color:var(--dm);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
+.sim-ctrl select,.sim-ctrl input[type=range]{width:100%;accent-color:var(--ac)}
+.sim-ctrl select{background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;cursor:pointer}
+.sim-ctrl select:focus{outline:none;border-color:var(--ac)}
+.sim-ctrl .range-val{display:inline-block;background:var(--sf2);color:var(--a2);font-family:monospace;font-size:18px;font-weight:700;padding:2px 10px;border-radius:6px;margin-top:6px}
+.sim-ctrl input[type=range]{height:6px;border-radius:3px;margin-top:4px}
+.sim-mode-btns{display:flex;gap:6px;margin-top:6px}
+.sim-mode-btn{flex:1;padding:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--dm);border-radius:6px;font-size:12px;cursor:pointer;text-align:center;transition:all .2s}
+.sim-mode-btn.active{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.sim-run-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gn),#00b894);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:1px;position:relative;overflow:hidden}
+.sim-run-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,206,201,.3)}
+.sim-run-btn:active{transform:translateY(0)}
+.sim-run-btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:ripple-anim .6s linear}
+@keyframes ripple-anim{to{transform:scale(4);opacity:0}}
+.sim-result{margin-top:20px;display:none;animation:fadeInUp .4s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.sim-stock-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+.sim-stock-table th{text-align:left;padding:8px 10px;color:var(--dm);font-size:11px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--bd)}
+.sim-stock-table td{padding:8px 10px;border-bottom:1px solid rgba(45,49,72,.5)}
+.sim-stock-table tr:hover{background:rgba(108,92,231,.05)}
+.sim-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.sim-metric{background:var(--sf);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--bd);transition:transform .2s}
+.sim-metric:hover{transform:translateY(-2px)}
+.sim-metric .sv{font-size:24px;font-weight:700}.sim-metric .sl{font-size:11px;color:var(--dm);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.sim-metric.pos .sv{color:var(--gn)}.sim-metric.neg .sv{color:var(--rd)}.sim-metric.neu .sv{color:var(--a2)}
+.sim-chart-box{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-top:16px;height:300px;position:relative}
+.custom-alloc-area{margin-top:8px;display:none}
+.custom-alloc-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.custom-alloc-row span{min-width:80px;color:var(--tx);font-weight:500}
+.custom-alloc-row input{width:60px;background:var(--sf2);border:1px solid var(--bd);border-radius:4px;padding:4px 6px;color:var(--tx);font-size:12px;text-align:right}
 </style>
 </head>
 <body>
@@ -117,6 +156,45 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
     <p style="color:var(--dm);font-size:12px;margin-bottom:12px;opacity:0.7">数据源: baostock | 训练集: 2008-2022全A股日线 | 回测: 沪深300</p>
     <button class="run-btn" onclick="runMLRecommend()" style="width:auto;padding:12px 32px;font-size:15px">运行推荐</button>
     <div id="ml-recommend-result" style="margin-top:16px"></div>
+  </div>
+  <!-- Investment Simulator -->
+  <div class="sim-section" id="sim-section">
+    <div class="sim-header">
+      <span style="font-size:24px">💰</span>
+      <h3>AI投资模拟器</h3>
+      <span class="badge">INTERACTIVE</span>
+    </div>
+    <p style="color:var(--dm);font-size:13px;margin-bottom:16px">选择年份和参数，模拟跟随AI选股策略的投资表现，并与沪深300指数对比</p>
+    <div class="sim-controls">
+      <div class="sim-ctrl">
+        <label>📅 选择年份</label>
+        <select id="sim-year">
+          <option value="0">2023年</option>
+          <option value="1">2024年</option>
+          <option value="2">2025年</option>
+          <option value="3">2026年</option>
+        </select>
+      </div>
+      <div class="sim-ctrl">
+        <label>🎯 持仓数量 (Top-N)</label>
+        <input type="range" id="sim-topn" min="1" max="10" value="5" oninput="document.getElementById('sim-topn-val').textContent=this.value;simUpdateCustomAlloc()">
+        <span class="range-val" id="sim-topn-val">5</span>
+      </div>
+      <div class="sim-ctrl">
+        <label>⚖️ 仓位模式</label>
+        <div class="sim-mode-btns">
+          <div class="sim-mode-btn active" id="sim-mode-equal" onclick="simSetMode('equal')">等权分配</div>
+          <div class="sim-mode-btn" id="sim-mode-custom" onclick="simSetMode('custom')">自定义比例</div>
+        </div>
+        <div class="custom-alloc-area" id="sim-custom-alloc"></div>
+      </div>
+    </div>
+    <button class="sim-run-btn" onclick="runSimulator()">🚀 开始模拟</button>
+    <div class="sim-result" id="sim-result">
+      <div id="sim-stocks-area"></div>
+      <div class="sim-metrics" id="sim-metrics"></div>
+      <div class="sim-chart-box"><canvas id="sim-chart"></canvas></div>
+    </div>
   </div>
   <div class="card" style="margin-bottom:16px">
     <h3>因子模型概览</h3>
@@ -495,6 +573,204 @@ function runMLRecommend(){
   });
   h+='</tbody></table></div>';
   document.getElementById('ml-recommend-result').innerHTML='<div style="margin-bottom:8px;font-size:15px;font-weight:600;color:var(--a2)">🏆 '+latest.year+'年 TOP10 推荐选股</div>'+h;
+}
+
+/* ===== Investment Simulator ===== */
+var CSI300_RETURNS={0:-11.4,1:14.7,2:-3.0,3:-5.2};
+var simChart=null;
+var simMode='equal';
+
+function simSetMode(mode){
+  simMode=mode;
+  document.getElementById('sim-mode-equal').classList.toggle('active',mode==='equal');
+  document.getElementById('sim-mode-custom').classList.toggle('active',mode==='custom');
+  document.getElementById('sim-custom-alloc').style.display=mode==='custom'?'block':'none';
+  if(mode==='custom')simUpdateCustomAlloc();
+}
+
+function simUpdateCustomAlloc(){
+  if(simMode!=='custom')return;
+  var yearIdx=parseInt(document.getElementById('sim-year').value);
+  var topN=parseInt(document.getElementById('sim-topn').value);
+  var d=ML_DATA[yearIdx];if(!d)return;
+  var preds=Object.entries(d.predictions).map(function(kv){return{code:kv[0],name:kv[1].name,fusion:kv[1].fusion,ret:kv[1].actual_return}});
+  preds.sort(function(a,b){return b.fusion-a.fusion});
+  var top=preds.slice(0,topN);
+  var eq=100/topN;
+  var h='<div style="font-size:11px;color:var(--dm);margin-bottom:6px">自定义权重 (%)</div>';
+  top.forEach(function(s,i){
+    h+='<div class="custom-alloc-row"><span>'+s.name+'</span><input type="number" id="sim-alloc-'+i+'" value="'+eq.toFixed(1)+'" min="0" max="100" step="1" style="width:60px">%</div>';
+  });
+  document.getElementById('sim-custom-alloc').innerHTML=h;
+}
+
+document.getElementById('sim-year').addEventListener('change',function(){simUpdateCustomAlloc()});
+
+function runSimulator(){
+  var yearIdx=parseInt(document.getElementById('sim-year').value);
+  var topN=parseInt(document.getElementById('sim-topn').value);
+  var d=ML_DATA[yearIdx];if(!d)return;
+  var preds=Object.entries(d.predictions).map(function(kv){return{code:kv[0],name:kv[1].name,l0:kv[1].l0,l1:kv[1].l1,l3:kv[1].l3,fusion:kv[1].fusion,ret:kv[1].actual_return}});
+  preds.sort(function(a,b){return b.fusion-a.fusion});
+  var top=preds.slice(0,topN);
+
+  // Calculate weights
+  var weights=[];
+  if(simMode==='custom'){
+    var total=0;
+    top.forEach(function(s,i){
+      var inp=document.getElementById('sim-alloc-'+i);
+      var w=inp?parseFloat(inp.value)||0:100/topN;
+      weights.push(w);total+=w;
+    });
+    if(total<=0){alert('权重总和必须大于0');return}
+    weights=weights.map(function(w){return w/total});
+  } else {
+    top.forEach(function(){weights.push(1/topN)});
+  }
+
+  // Calculate weighted portfolio return
+  var portReturn=0;
+  var hasNull=false;
+  top.forEach(function(s,i){
+    if(s.ret===null){hasNull=true;return}
+    portReturn+=s.ret*weights[i];
+  });
+
+  // Build stock table
+  var st='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+  st+='<span style="font-size:16px;font-weight:700;color:var(--a2)">📋 选中的TOP'+topN+'股票</span>';
+  st+='<span style="font-size:12px;padding:2px 8px;border-radius:20px;background:rgba(0,206,201,.15);color:var(--gn)">'+d.year+'年</span></div>';
+  st+='<div style="overflow-x:auto"><table class="sim-stock-table"><thead><tr>';
+  ['','代码','名称','融合评分','TechPulse','AlphaForge','Sentinel','权重','实际收益'].forEach(function(h){
+    st+='<th>'+h+'</th>';
+  });
+  st+='</tr></thead><tbody>';
+  top.forEach(function(s,i){
+    st+='<tr>';
+    st+='<td style="font-weight:700;color:var(--a2)">'+(i+1)+'</td>';
+    st+='<td style="font-family:monospace">'+s.code+'</td>';
+    st+='<td style="font-weight:600">'+s.name+'</td>';
+    st+='<td style="text-align:right;font-weight:700;font-family:monospace;color:var(--a2)">'+s.fusion.toFixed(3)+'</td>';
+    st+='<td style="text-align:right;font-family:monospace;color:'+(s.l0>=0?'var(--gn)':'var(--rd)')+'">'+(s.l0>=0?'+':'')+s.l0.toFixed(3)+'</td>';
+    st+='<td style="text-align:right;font-family:monospace;color:'+(s.l1>=0?'var(--gn)':'var(--rd)')+'">'+(s.l1>=0?'+':'')+s.l1.toFixed(3)+'</td>';
+    st+='<td style="text-align:right;font-family:monospace;color:'+(s.l3>=0?'var(--gn)':'var(--rd)')+'">'+(s.l3>=0?'+':'')+s.l3.toFixed(3)+'</td>';
+    st+='<td style="text-align:right;font-weight:600;color:var(--a2)">'+(weights[i]*100).toFixed(1)+'%</td>';
+    if(s.ret!==null)st+='<td style="text-align:right;font-weight:600;color:'+(s.ret>=0?'var(--gn)':'var(--rd)')+'">'+(s.ret>=0?'+':'')+s.ret+'%</td>';
+    else st+='<td style="text-align:right;color:var(--dm)">N/A</td>';
+    st+='</tr>';
+  });
+  st+='</tbody></table></div>';
+  document.getElementById('sim-stocks-area').innerHTML=st;
+
+  // Metrics
+  var csi300Ret=CSI300_RETURNS[yearIdx];
+  var alpha=portReturn-csi300Ret;
+  var m='<div class="sim-metric '+(portReturn>=0?'pos':'neg')+'"><div class="sv">'+(portReturn>=0?'+':'')+portReturn.toFixed(2)+'%</div><div class="sl">策略收益</div></div>';
+  m+='<div class="sim-metric '+(csi300Ret>=0?'pos':'neg')+'"><div class="sv">'+(csi300Ret>=0?'+':'')+csi300Ret+'%</div><div class="sl">沪深300</div></div>';
+  m+='<div class="sim-metric '+(alpha>=0?'pos':'neg')+'"><div class="sv">'+(alpha>=0?'+':'')+alpha.toFixed(2)+'%</div><div class="sl">超额收益(Alpha)</div></div>';
+  m+='<div class="sim-metric neu"><div class="sv">'+topN+'</div><div class="sl">持仓股数</div></div>';
+  document.getElementById('sim-metrics').innerHTML=m;
+
+  // Cumulative chart: simulate each year's return for the strategy and CSI300
+  // Starting from 100k, apply each year's return
+  var years=[2023,2024,2025,2026];
+  var stratValues=[100000];
+  var csiValues=[100000];
+  var yearLabels=['起点'];
+  for(var yi=0;yi<ML_DATA.length;yi++){
+    var yd=ML_DATA[yi];
+    var yp=Object.entries(yd.predictions).map(function(kv){return{code:kv[0],name:kv[1].name,fusion:kv[1].fusion,ret:kv[1].actual_return}});
+    yp.sort(function(a,b){return b.fusion-a.fusion});
+    var yTop=yp.slice(0,topN);
+    var yRet=0,yCnt=0;
+    yTop.forEach(function(s){
+      if(s.ret!==null){yRet+=s.ret;yCnt++}
+    });
+    yRet=yCnt>0?yRet/yCnt:0;
+    stratValues.push(stratValues[stratValues.length-1]*(1+yRet/100));
+    csiValues.push(csiValues[csiValues.length-1]*(1+CSI300_RETURNS[yi]/100));
+    yearLabels.push(years[yi]+'年');
+  }
+  // Highlight the selected year
+  var highlightIdx=yearIdx+1;
+
+  document.getElementById('sim-result').style.display='block';
+  document.getElementById('sim-result').style.animation='none';
+  void document.getElementById('sim-result').offsetHeight;
+  document.getElementById('sim-result').style.animation='fadeInUp .4s ease';
+
+  if(simChart)simChart.destroy();
+  var ctx=document.getElementById('sim-chart').getContext('2d');
+  simChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:yearLabels,
+      datasets:[
+        {
+          label:'🧠 AI策略',
+          data:stratValues.map(function(v){return Math.round(v)}),
+          borderColor:'#6c5ce7',
+          backgroundColor:'rgba(108,92,231,.15)',
+          fill:true,
+          tension:.3,
+          pointRadius:yearLabels.map(function(_,i){return i===highlightIdx?8:4}),
+          pointBackgroundColor:yearLabels.map(function(_,i){return i===highlightIdx?'#6c5ce7':'#6c5ce7'}),
+          pointBorderColor:yearLabels.map(function(_,i){return i===highlightIdx?'#fff':'transparent'}),
+          pointBorderWidth:yearLabels.map(function(_,i){return i===highlightIdx?3:0}),
+          borderWidth:3
+        },
+        {
+          label:'📊 沪深300',
+          data:csiValues.map(function(v){return Math.round(v)}),
+          borderColor:'rgba(255,107,107,.8)',
+          backgroundColor:'rgba(255,107,107,.08)',
+          fill:true,
+          tension:.3,
+          pointRadius:yearLabels.map(function(_,i){return i===highlightIdx?8:4}),
+          pointBackgroundColor:'rgba(255,107,107,.8)',
+          pointBorderColor:yearLabels.map(function(_,i){return i===highlightIdx?'#fff':'transparent'}),
+          pointBorderWidth:yearLabels.map(function(_,i){return i===highlightIdx?3:0}),
+          borderWidth:2,
+          borderDash:[5,3]
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:true,labels:{color:'#8b8fa3',font:{size:12},usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{
+          backgroundColor:'#1a1d27',
+          titleColor:'#e4e6ef',
+          bodyColor:'#8b8fa3',
+          borderColor:'#2d3148',
+          borderWidth:1,
+          padding:12,
+          callbacks:{
+            label:function(ctx){
+              return ctx.dataset.label+': ¥'+ctx.parsed.y.toLocaleString();
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#8b8fa3',font:{size:11}},grid:{color:'rgba(45,49,72,.4)'}},
+        y:{
+          ticks:{
+            color:'#8b8fa3',
+            callback:function(v){return '¥'+v.toLocaleString()}
+          },
+          grid:{color:'rgba(45,49,72,.4)'}
+        }
+      }
+    }
+  });
+
+  // Scroll to result
+  document.getElementById('sim-result').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 init();

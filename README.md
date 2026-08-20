@@ -1,7 +1,3 @@
-<p align="center">
-  <img src=".github/screenshots/build-filled.png" width="80%" alt="QuantPilot AI 选股引擎"/>
-</p>
-
 <h1 align="center">QuantPilot</h1>
 
 <p align="center">
@@ -132,6 +128,21 @@ QuantPilot 采用**三层加权融合**的异构因子模型架构：
 
 ---
 
+### 策略收益 vs 沪深300
+
+以2023年初 = 100为基准，逐年累计对比：
+
+| 年份 | 沪深300（年收益） | 策略TOP5（年收益） | 沪深300累计 | 策略累计 |
+|:----:|:-----------------:|:------------------:|:-----------:|:--------:|
+| 2023 | -11.4% | +8.84% | 88.6 | 108.84 |
+| 2024 | +14.7% | +17.33% | 101.6 | 127.71 |
+| 2025 | -3.0% | +2.68% | 98.6 | 131.13 |
+| 2026 | -5.2% | -2.98% | 93.5 | 127.22 |
+
+> **4年累计：** 策略 **+27.2%** vs 沪深300 **-6.5%** — 跑赢基准 **+33.7个百分点**。
+
+---
+
 ## 🔌 MCP 集成
 
 QuantPilot 将选股引擎封装为 **MCP 工具**，可被任何兼容MCP的AI Agent调用：
@@ -193,12 +204,22 @@ quantpilot/
 
 ---
 
-## 🧱 DIY 策略构建器（辅助功能）
+## 🧱 如果你更相信技术面
 
-QuantPilot 还包含一个无代码策略构建器，提供12个可组合的策略模块：
+不信任纯ML模型？没问题。我们的MCP Server支持任意配置技术指标（MA/RSI/MACD/KDJ等12个积木）与三层模型的决策配比。你可以设置AlphaForge占30%、你自己选的指标占70%，完全自定义。
+
+> **进阶用法：** 适合希望将自己的技术面信号与模型信号融合的用户。通过MCP Server的 `backtest` 工具，传入自定义权重配置即可回测任意组合：
+>
+> ```python
+> # 示例：自定义权重 — 你的技术指标占主导
+> result = mcp_client.call_tool("quantpilot", "backtest", {
+>     "weights": {"AlphaForge": 0.30, "TechPulse": 0.20, "Sentinel": 0.10, "custom_tech": 0.40},
+>     "custom_indicators": ["MA_cross", "RSI", "MACD", "KDJ"]
+> })
+> ```
 
 <details>
-<summary>点击展开策略模块列表</summary>
+<summary>点击展开全部12个技术指标积木</summary>
 
 | 模块 | 逻辑 |
 |------|------|
