@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QuantPilot — 量化策略交易平台</title>
+<title>QuantPilot — 三层因子融合的AI选股引擎</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -70,22 +70,47 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 <body>
 <div class="app">
 <header>
-  <div class="logo">Quant<span>Pilot</span> <span class="tag">v0.3</span></div>
+  <div class="logo">Quant<span>Pilot</span> <span class="tag">v0.4</span></div>
   <div style="display:flex;align-items:center;gap:8px">
     <span class="demo-tag">DEMO</span>
-    <span style="color:var(--dm);font-size:13px">量化策略交易平台 · 12个免费策略积木</span>
+    <span style="color:var(--dm);font-size:13px">三层因子融合的AI选股引擎 · 12个免费策略积木</span>
   </div>
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('build')">🔧 搭建策略</div>
+  <div class="tab active" onclick="switchTab('ml')">🧠 ML因子选股</div>
+  <div class="tab" onclick="switchTab('build')">🔧 DIY策略</div>
   <div class="tab" onclick="switchTab('presets')">⭐ 策略预设</div>
   <div class="tab" onclick="switchTab('results')">📊 回测结果</div>
   <div class="tab" onclick="switchTab('catalog')">📚 组件手册</div>
-  <div class="tab" onclick="switchTab('ml')">🧠 ML因子选股</div>
 </div>
 
-<div id="tab-build">
+<div id="tab-ml">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+    <h2 style="font-size:20px">🧠 ML多层因子选股回测</h2><span class="demo-tag">DEMO</span>
+  </div>
+  <div class="card" style="margin-bottom:16px;border:2px solid var(--ac);background:linear-gradient(135deg,rgba(108,92,231,.08),rgba(162,155,254,.04))">
+    <h3 style="color:var(--a2)">🚀 AI推荐选股</h3>
+    <p style="color:var(--dm);font-size:14px;margin-bottom:12px">基于三层因子融合模型，自动筛选最具投资价值的股票</p>
+    <button class="run-btn" onclick="runMLRecommend()" style="width:auto;padding:12px 32px;font-size:15px">运行推荐</button>
+    <div id="ml-recommend-result" style="margin-top:16px"></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <h3>因子模型概览</h3>
+    <div style="overflow-x:auto"><table id="ml-factor-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <h3>年度回测绩效</h3>
+    <div style="overflow-x:auto"><table id="ml-year-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
+  </div>
+  <div class="card">
+    <h3>个股选股详情</h3>
+    <select id="ml-year-select" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;margin-bottom:16px" onchange="renderMLDetail()"></select>
+    <div id="ml-detail"></div>
+  </div>
+</div>
+
+<div id="tab-build" style="display:none">
 <div class="builder-layout">
   <div class="card catalog">
     <h3>策略积木库</h3>
@@ -148,24 +173,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
   <div class="card"><h3>策略积木手册</h3><div id="catalog-detail"></div></div>
 </div>
 
-<div id="tab-ml" style="display:none">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-    <h2 style="font-size:20px">🧠 ML多层因子选股回测</h2><span class="demo-tag">DEMO</span>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <h3>因子模型概览</h3>
-    <div style="overflow-x:auto"><table id="ml-factor-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <h3>年度回测绩效</h3>
-    <div style="overflow-x:auto"><table id="ml-year-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
-  </div>
-  <div class="card">
-    <h3>个股选股详情</h3>
-    <select id="ml-year-select" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;margin-bottom:16px" onchange="renderMLDetail()"></select>
-    <div id="ml-detail"></div>
-  </div>
-</div>
 </div>
 
 <script>
@@ -430,11 +437,41 @@ function renderMLDetail(){
 
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(t,i){
-    t.classList.toggle('active',['build','presets','results','catalog','ml'][i]===n);
+    t.classList.toggle('active',['ml','build','presets','results','catalog'][i]===n);
   });
-  ['build','presets','results','catalog','ml'].forEach(function(id){
+  ['ml','build','presets','results','catalog'].forEach(function(id){
     document.getElementById('tab-'+id).style.display=id===n?'':'none';
   });
+}
+
+function runMLRecommend(){
+  if(!ML_DATA||!ML_DATA.length){alert('暂无ML数据');return}
+  var latest=ML_DATA[ML_DATA.length-1];
+  var preds=Object.entries(latest.predictions).map(function(kv){
+    return{code:kv[0],name:kv[1].name,l0:kv[1].l0,l1:kv[1].l1,l3:kv[1].l3,fusion:kv[1].fusion,ret:kv[1].actual_return}
+  });
+  var top10=preds.slice().sort(function(a,b){return b.fusion-a.fusion}).slice(0,10);
+  var h='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">';
+  h+='<thead><tr style="border-bottom:2px solid var(--bd)">';
+  ['排名','代码','名称','TechPulse(L0)','AlphaForge(L1)','Sentinel(L3)','融合评分','实际收益'].forEach(function(t){
+    h+='<th style="text-align:'+(t==='排名'||t==='代码'||t==='名称'?'left':'right')+';padding:8px 10px;color:var(--dm)">'+t+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+  top10.forEach(function(s,i){
+    h+='<tr style="border-bottom:1px solid var(--bd)">';
+    h+='<td style="padding:8px 10px;font-weight:700;color:var(--a2)">'+(i+1)+'</td>';
+    h+='<td style="padding:8px 10px;font-family:monospace">'+s.code+'</td>';
+    h+='<td style="padding:8px 10px;font-weight:600">'+s.name+'</td>';
+    h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l0>=0?'var(--gn)':'var(--rd)')+'">'+(s.l0>=0?'+':'')+s.l0.toFixed(3)+'</td>';
+    h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l1>=0?'var(--gn)':'var(--rd)')+'">'+(s.l1>=0?'+':'')+s.l1.toFixed(3)+'</td>';
+    h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l3>=0?'var(--gn)':'var(--rd)')+'">'+(s.l3>=0?'+':'')+s.l3.toFixed(3)+'</td>';
+    h+='<td style="padding:8px 10px;text-align:right;font-weight:700;font-family:monospace;color:var(--a2)">'+s.fusion.toFixed(3)+'</td>';
+    if(s.ret!==null){h+='<td style="padding:8px 10px;text-align:right;font-weight:600;color:'+(s.ret>=0?'var(--gn)':'var(--rd)')+'">'+(s.ret>=0?'+':'')+s.ret+'%</td>'}
+    else{h+='<td style="padding:8px 10px;text-align:right;color:var(--dm)">N/A</td>'}
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  document.getElementById('ml-recommend-result').innerHTML='<div style="margin-bottom:8px;font-size:15px;font-weight:600;color:var(--a2)">🏆 '+latest.year+'年 TOP10 推荐选股</div>'+h;
 }
 
 init();
