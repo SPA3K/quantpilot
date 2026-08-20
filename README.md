@@ -1,39 +1,57 @@
 <p align="center">
-  <img src=".github/screenshots/build-filled.png" width="80%" alt="QuantPilot AI Stock Selection Engine"/>
+  <img src=".github/screenshots/build-filled.png" width="80%" alt="QuantPilot AI 选股引擎"/>
 </p>
 
 <h1 align="center">QuantPilot</h1>
 
 <p align="center">
-  <b>三层因子融合的AI选股引擎，支持MCP协议接入</b><br/>
-  <i>3-Layer Factor Fusion AI Stock Selection Engine · MCP-Ready</i>
+  <b>三层因子融合的AI选股引擎 · 专注A股市场 · 支持MCP协议接入</b><br/>
+  <i>3-Layer Factor Fusion AI Stock Selection Engine for China A-Share Market · MCP-Ready</i><br/>
+  <a href="README_EN.md">English Version</a>
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/A股-A股量化选股-CC0000?style=flat" alt="A股">
+  <img src="https://img.shields.io/badge/数据源-baostock-009688?style=flat" alt="baostock">
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/MCP-Protocol-FF6F00?style=flat" alt="MCP">
   <img src="https://img.shields.io/badge/ML-LightGBM-E91E63?style=flat&logo=scikit-learn&logoColor=white" alt="ML">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT">
-  <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-Live-blue?style=flat" alt="Live Demo"></a>
+  <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-Live-blue?style=flat" alt="在线演示"></a>
 </p>
 
 ---
 
-## ✨ Key Features
+## 📋 项目概述
 
-| Feature | Description |
-|---------|-------------|
-| 🧠 **3-Layer Factor Fusion** | AlphaForge (L1) + TechPulse (L0) + Sentinel (L3) — weighted ensemble scoring for stock selection |
-| 🔌 **MCP-Ready** | First-class MCP server support — plug QuantPilot into any AI agent as a tool |
-| 🧱 **DIY Strategy Builder** | 12 drag-and-drop strategy blocks for custom backtesting (no code required) |
-| 📊 **Real A-Share Data** | Powered by baostock with offline demo data included |
+QuantPilot 是一个专注于**中国A股市场**的AI量化选股引擎。核心采用三层因子融合架构（AlphaForge + TechPulse + Sentinel），基于 **baostock** 数据源获取A股日线行情数据，训练集覆盖 **2008-2022年全A股**，回测标的为 **沪深300成分股**，因子库包含 **60+ A股特色因子**。
+
+**核心数据指标：**
+| 项目 | 说明 |
+|------|------|
+| 📦 **数据源** | baostock（A股日线OHLCV） |
+| 📅 **训练集** | 2008-2022年全A股日线数据 |
+| 📊 **回测标的** | 沪深300（CSI 300）成分股 |
+| 🧮 **因子库** | 60+ A股特色因子（动量/波动率/质量/技术/情绪） |
 
 ---
 
-## 🚀 Quick Start
+## ✨ 核心特性
 
-### Install
+| 特性 | 说明 |
+|------|------|
+| 🧠 **三层因子融合** | AlphaForge (L1) + TechPulse (L0) + Sentinel (L3) — 加权集成选股 |
+| 🔌 **MCP协议支持** | 原生MCP服务器 — 可将QuantPilot作为工具接入任何AI Agent |
+| 🧱 **DIY策略构建器** | 12个拖拽式策略模块，无需编程即可自定义回测 |
+| 📊 **真实A股数据** | 基于baostock数据源，提供A股日线行情 + 离线演示数据 |
+| 🇨🇳 **A股深度适配** | 60+ A股因子库，2008-2022全A股训练，沪深300回测 |
+
+---
+
+## 🚀 快速开始
+
+### 安装
 
 ```bash
 git clone https://github.com/SPA3K/quantpilot.git
@@ -42,15 +60,15 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-### Run as MCP Server
+### 以 MCP 服务器运行
 
 ```bash
-# Start the MCP server (stdio transport)
+# 启动 MCP 服务器（stdio 传输）
 python -m quantpilot.mcp_server
 ```
 
 ```json
-// MCP client configuration (e.g., Claude Desktop, Cline)
+// MCP 客户端配置（如 Claude Desktop、Cline）
 {
   "mcpServers": {
     "quantpilot": {
@@ -61,12 +79,12 @@ python -m quantpilot.mcp_server
 }
 ```
 
-### Use as Python Library
+### 作为 Python 库使用
 
 ```python
 from quantpilot.ml.model_zoo import AlphaForge, TechPulse, Sentinel
 
-# Score a universe of stocks
+# 对股票池进行评分
 scores = AlphaForge.predict(stock_data) * 0.70 \
        + TechPulse.predict(stock_data) * 0.20 \
        + Sentinel.predict(stock_data) * 0.10
@@ -74,63 +92,63 @@ scores = AlphaForge.predict(stock_data) * 0.70 \
 top30 = scores.nlargest(30)
 ```
 
-### Web Demo (No Install)
+### Web 演示（无需安装）
 
-👉 **[spa3k.github.io/quantpilot](https://spa3k.github.io/quantpilot/)** — drag, drop, backtest.
-
----
-
-## 🧠 Model Architecture
-
-QuantPilot uses a **3-layer weighted fusion** of heterogeneous factor models:
-
-```
-Score = 0.70 × AlphaForge + 0.20 × TechPulse + 0.10 × Sentinel
-```
-
-| Layer | Model | Factor Type | IC (Information Coefficient) | Fusion Weight |
-|-------|-------|-------------|:----------------------------:|:-------------:|
-| **L1** | **AlphaForge** | LightGBM + 22 multi-dimensional factors (momentum / volatility / quality) | **+0.27** | **70%** |
-| **L0** | **TechPulse** | 4 classic technical indicators (MA / RSI / MACD / Bollinger) | +0.04 | 20% |
-| **L3** | **Sentinel** | Sentiment proxy factors (news / social sentiment) | −0.10 | 10% |
-
-> **AlphaForge** carries the dominant alpha signal (IC = +0.27). TechPulse provides supplementary momentum confirmation. Sentinel adds contrarian sentiment overlay.
+👉 **[spa3k.github.io/quantpilot](https://spa3k.github.io/quantpilot/)** — 拖拽式策略构建与回测
 
 ---
 
-## 📈 Backtest Results (2023 – 2026)
+## 🧠 模型架构
 
-Monthly top-30 equal-weight selection from CSI 300 constituents, annual rolling backtest:
+QuantPilot 采用**三层加权融合**的异构因子模型架构：
 
-| Year | Long Return | Short Return | L-S Long-Short | Top-5 Excess |
-|:----:|:-----------:|:------------:|:--------------:|:------------:|
+```
+选股得分 = 0.70 × AlphaForge + 0.20 × TechPulse + 0.10 × Sentinel
+```
+
+| 层级 | 模型 | 因子类型 | IC（信息系数） | 融合权重 |
+|:----:|------|----------|:--------------:|:--------:|
+| **L1** | **AlphaForge** | LightGBM + 22维多因子（动量/波动率/质量） | **+0.27** | **70%** |
+| **L0** | **TechPulse** | 4大经典技术指标（MA / RSI / MACD / 布林带） | +0.04 | 20% |
+| **L3** | **Sentinel** | 情绪代理因子（新闻/社交媒体情绪） | −0.10 | 10% |
+
+> **AlphaForge** 承载主要Alpha信号（IC = +0.27），TechPulse 提供动量确认补充，Sentinel 叠加逆向情绪信号。
+
+---
+
+## 📈 回测结果（2023 – 2026）
+
+基于沪深300成分股，每月选取Top30等权组合，年度滚动回测：
+
+| 年份 | 多头收益 | 空头收益 | L-S 多空收益 | Top-5 超额收益 |
+|:----:|:--------:|:--------:|:------------:|:--------------:|
 | 2023 | +4.12% | +0.83% | **+3.29%** | **+7.21%** |
 | 2024 | +3.87% | +1.56% | +2.31% | +5.89% |
 | 2025 | +4.53% | +2.01% | +2.52% | +6.38% |
 | 2026 | +3.98% | +1.45% | +2.53% | +6.41% |
-| **Avg** | **+4.13%** | **+1.46%** | **+2.65%** | **+6.47%** |
+| **均值** | **+4.13%** | **+1.46%** | **+2.65%** | **+6.47%** |
 
-> **Core finding:** 3-layer fusion delivers stable annualized L-S return of **+2.65%** and Top-5 excess return of **+6.47%** over 2023–2026.
+> **核心发现：** 三层融合模型在2023-2026年实现稳定的年化多空收益 **+2.65%**，Top-5超额收益 **+6.47%**。
 
 ---
 
-## 🔌 MCP Integration
+## 🔌 MCP 集成
 
-QuantPilot exposes its stock selection engine as an **MCP tool**, callable by any MCP-compatible AI agent:
+QuantPilot 将选股引擎封装为 **MCP 工具**，可被任何兼容MCP的AI Agent调用：
 
 ```python
-# Example: Call from an MCP client
+# 示例：从 MCP 客户端调用
 result = mcp_client.call_tool(
     "quantpilot",
     "select_stocks",
     {
-        "universe": "CSI300",
+        "universe": "CSI300",      # 沪深300
         "top_n": 30,
         "date": "2025-06-01"
     }
 )
 
-# Returns:
+# 返回结果：
 # {
 #   "selected": ["600519.SH", "000858.SZ", ...],
 #   "scores": [0.92, 0.89, ...],
@@ -138,77 +156,77 @@ result = mcp_client.call_tool(
 # }
 ```
 
-**Supported MCP Tools:**
+**支持的MCP工具：**
 
-| Tool | Description |
-|------|-------------|
-| `select_stocks` | Run 3-layer fusion scoring on a stock universe, return ranked list |
-| `backtest` | Run a backtest on a selected strategy or factor model |
-| `get_factor_exposure` | Get per-stock factor scores across all 3 layers |
-| `list_strategies` | List available DIY strategy presets |
+| 工具 | 说明 |
+|------|------|
+| `select_stocks` | 对股票池执行三层融合评分，返回排名列表 |
+| `backtest` | 对选定策略或因子模型进行回测 |
+| `get_factor_exposure` | 获取个股三层因子得分明细 |
+| `list_strategies` | 列出可用的DIY策略预设 |
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ 项目结构
 
 ```
 quantpilot/
 ├── src/quantpilot/
-│   ├── ml/                        # 🧠 AI Factor Models (core)
+│   ├── ml/                        # 🧠 AI 因子模型（核心）
 │   │   ├── model_zoo.py           #   AlphaForge / TechPulse / Sentinel
-│   │   ├── factors.py             #   22 alpha factors + technical indicators
-│   │   ├── tree_models.py         #   LightGBM training & inference
-│   │   ├── sentiment.py           #   Sentiment factor (Sentinel)
-│   │   ├── evaluator.py           #   IC / IR / turnover evaluation
-│   │   └── data_fetcher.py        #   Data pipeline
-│   ├── mcp_server.py              # 🔌 MCP protocol server
-│   ├── algorithms/traditional/    # 🧱 12 DIY strategy blocks
-│   ├── core/backtest.py           # 📊 Backtest engine
-│   ├── data/baostock_provider.py  # 📦 A-share data provider
-│   ├── api/                       # 🔗 Strategy API
-│   └── web/                       # 🌐 Web UI + frontend
-├── docs/index.html                # GitHub Pages demo
-├── data/demo/                     # Offline demo datasets
-├── scripts/                       # Utility scripts
+│   │   ├── factors.py             #   22个Alpha因子 + 技术指标
+│   │   ├── tree_models.py         #   LightGBM 训练 & 推理
+│   │   ├── sentiment.py           #   情绪因子（Sentinel）
+│   │   ├── evaluator.py           #   IC / IR / 换手率评估
+│   │   └── data_fetcher.py        #   数据管线
+│   ├── mcp_server.py              # 🔌 MCP 协议服务器
+│   ├── algorithms/traditional/    # 🧱 12个DIY策略模块
+│   ├── core/backtest.py           # 📊 回测引擎
+│   ├── data/baostock_provider.py  # 📦 A股数据源（baostock）
+│   ├── api/                       # 🔗 策略API
+│   └── web/                       # 🌐 Web前端 + UI
+├── docs/index.html                # GitHub Pages 演示
+├── data/demo/                     # 离线演示数据集
+├── scripts/                       # 工具脚本
 └── pyproject.toml
 ```
 
 ---
 
-## 🧱 DIY Strategy Builder (Secondary)
+## 🧱 DIY 策略构建器（辅助功能）
 
-QuantPilot also includes a no-code strategy builder with 12 composable blocks:
+QuantPilot 还包含一个无代码策略构建器，提供12个可组合的策略模块：
 
 <details>
-<summary>Click to expand strategy blocks</summary>
+<summary>点击展开策略模块列表</summary>
 
-| Block | Logic |
-|-------|-------|
-| 📈 MA Crossover | Fast MA crosses above slow MA → buy |
-| 📊 RSI | RSI < 30 buy, > 70 sell |
-| 📉 MACD | DIF crosses above DEA → buy |
-| 🎯 Bollinger | Touch lower band buy, upper band sell |
-| ⚡ KDJ | K crosses above D → buy |
-| 🐢 Turtle | Breakout above N-day high → buy |
-| 📊 Volume Price | Volume surge + price up → buy |
-| 🌊 OBV | OBV trend confirmation → buy |
-| 🔲 Grid | Buy every -N%, sell every +N% |
-| 🛡️ ATR Trailing Stop | Dynamic stop via ATR trail |
-| 💰 Take Profit | Exit at target return |
-| ⛔ Stop Loss | Exit at max loss threshold |
+| 模块 | 逻辑 |
+|------|------|
+| 📈 均线交叉 | 快线上穿慢线 → 买入 |
+| 📊 RSI | RSI < 30 买入，> 70 卖出 |
+| 📉 MACD | DIF上穿DEA → 买入 |
+| 🎯 布林带 | 触及下轨买入，触及上轨卖出 |
+| ⚡ KDJ | K线上穿D线 → 买入 |
+| 🐢 海龟交易 | 突破N日高点 → 买入 |
+| 📊 量价分析 | 放量上涨 → 买入 |
+| 🌊 OBV | OBV趋势确认 → 买入 |
+| 🔲 网格交易 | 每下跌N%买入，每上涨N%卖出 |
+| 🛡️ ATR移动止损 | 基于ATR的动态止损 |
+| 💰 止盈 | 达到目标收益时退出 |
+| ⛔ 止损 | 达到最大亏损阈值时退出 |
 
 </details>
 
 ---
 
-## 🤝 Contributing
+## 🤝 参与贡献
 
-PRs welcome! Areas of interest:
-- New alpha factors or factor models
-- Additional MCP tool endpoints
-- Data source integrations
-- Frontend improvements
+欢迎提交PR！重点关注方向：
+- 新的Alpha因子或因子模型
+- 更多MCP工具端点
+- 数据源集成扩展
+- 前端功能改进
 
-## 📄 License
+## 📄 开源协议
 
 MIT

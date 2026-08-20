@@ -24,7 +24,7 @@ html = r'''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QuantPilot — 三层因子融合的AI选股引擎</title>
+<title>QuantPilot — A股三层因子融合AI选股引擎</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -93,8 +93,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 <header>
   <div class="logo">Quant<span>Pilot</span> <span class="tag">v0.4</span></div>
   <div style="display:flex;align-items:center;gap:8px">
+    <a href="index_en.html" style="color:var(--a2);font-size:13px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--ac)'" onmouseout="this.style.color='var(--a2)'">🌐 English</a>
     <span class="demo-tag">DEMO</span>
-    <span style="color:var(--dm);font-size:13px">三层因子融合的AI选股引擎 · 12个免费策略积木</span>
+    <span style="color:var(--dm);font-size:13px">A股三层因子融合AI选股引擎</span>
   </div>
 </header>
 
@@ -112,7 +113,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
   </div>
   <div class="card" style="margin-bottom:16px;border:2px solid var(--ac);background:linear-gradient(135deg,rgba(108,92,231,.08),rgba(162,155,254,.04))">
     <h3 style="color:var(--a2)">🚀 AI推荐选股</h3>
-    <p style="color:var(--dm);font-size:14px;margin-bottom:12px">基于三层因子融合模型，自动筛选最具投资价值的股票</p>
+    <p style="color:var(--dm);font-size:14px;margin-bottom:12px">基于三层因子融合模型，自动筛选A股市场最具投资价值的股票</p>
+    <p style="color:var(--dm);font-size:12px;margin-bottom:12px;opacity:0.7">数据源: baostock | 训练集: 2008-2022全A股日线 | 回测: 沪深300</p>
     <button class="run-btn" onclick="runMLRecommend()" style="width:auto;padding:12px 32px;font-size:15px">运行推荐</button>
     <div id="ml-recommend-result" style="margin-top:16px"></div>
   </div>
