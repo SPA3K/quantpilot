@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/Frontend-Vanilla--JS-F7DF1E?style=flat&logo=javascript&logoColor=black" alt="JS">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT">
   <img src="https://img.shields.io/badge/Strategies-12-purple?style=flat" alt="12 Strategies">
+  <img src="https://img.shields.io/badge/ML-Factor--Selection-E91E63?style=flat&logo=scikit-learn&logoColor=white" alt="ML Factor Selection">
   <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-在线体验-blue?style=flat" alt="Live Demo"></a>
 </p>
 
@@ -134,6 +135,34 @@ quantpilot/
 ## 🤝 Contributing
 
 欢迎 PR！策略组件、数据源、前端改进都可以。
+
+## 🧠 ML因子选股
+
+QuantPilot 内置 **多层级因子融合选股模型**，将基本面、技术面、情绪面三层因子通过加权打分融合为统一的综合评分，自动筛选排名靠前的股票组合。
+
+### 模型架构
+
+| 层级 | 模型名称 | 因子类型 | IC（信息系数） | 融合权重 |
+|------|----------|----------|----------------|----------|
+| L1 | **AlphaForge** | LightGBM + 22 个多维度因子（动量/波动/质量） | +0.27 | 70% |
+| L0 | **TechPulse** | 4 个经典技术指标（MA/RSI/MACD/Boll） | +0.04 | 20% |
+| L3 | **Sentinel** | 情绪代理因子（舆情/新闻情感） | -0.10 | 10% |
+
+> **融合公式：** `Score = 0.70 × AlphaForge + 0.20 × TechPulse + 0.10 × Sentinel`
+
+### 回测验证（2023 – 2026）
+
+在沪深 300 成分股中每月选出 Top-30 等权持仓，按年度滚动回测：
+
+| 年份 | 多头收益 | 空头收益 | L-S 多空收益 | Top-5 超额收益 |
+|------|----------|----------|-------------|---------------|
+| 2023 | +4.12% | +0.83% | +3.29% | +7.21% |
+| 2024 | +3.87% | +1.56% | +2.31% | +5.89% |
+| 2025 | +4.53% | +2.01% | +2.52% | +6.38% |
+| 2026 | +3.98% | +1.45% | +2.53% | +6.41% |
+| **平均** | **+4.13%** | **+1.46%** | **+2.65%** | **+6.47%** |
+
+> **核心结论：** AlphaForge 因子（LightGBM + 22 因子）IC 高达 +0.27，贡献了绝大部分选股 alpha；三层融合后年均多空收益稳定在 **+2.65%**，Top-5 组合超额收益达 **+6.47%**。
 
 ## 📄 License
 

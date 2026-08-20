@@ -14,6 +14,11 @@ with open(f"{BASE}/data/demo/strategies_compact.json") as f:
 results_js = json.dumps(demo_results, ensure_ascii=False, separators=(',', ':'))
 presets_js = json.dumps(presets, ensure_ascii=False, separators=(',', ':'))
 
+with open(f"{BASE}/eval_results/annual_backtest_20260820_1918.json") as f:
+    ml_data = json.load(f)
+
+ml_js = json.dumps(ml_data, ensure_ascii=False, separators=(',', ':'))
+
 html = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -98,6 +103,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
   <div class="tab" onclick="switchTab('presets')">⭐ 策略预设</div>
   <div class="tab" onclick="switchTab('results')">📊 回测结果</div>
   <div class="tab" onclick="switchTab('catalog')">📚 组件手册</div>
+  <div class="tab" onclick="switchTab('ml')">🧠 ML因子选股</div>
 </div>
 
 <div id="tab-build">
@@ -162,6 +168,25 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 <div id="tab-catalog" style="display:none">
   <div class="card"><h3>策略积木手册</h3><div id="catalog-detail"></div></div>
 </div>
+
+<div id="tab-ml" style="display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+    <h2 style="font-size:20px">🧠 ML多层因子选股回测</h2><span class="demo-tag">DEMO</span>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <h3>因子模型概览</h3>
+    <div style="overflow-x:auto"><table id="ml-factor-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <h3>年度回测绩效</h3>
+    <div style="overflow-x:auto"><table id="ml-year-table" style="width:100%;border-collapse:collapse;font-size:14px"></table></div>
+  </div>
+  <div class="card">
+    <h3>个股选股详情</h3>
+    <select id="ml-year-select" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:8px 12px;color:var(--tx);font-size:14px;margin-bottom:16px" onchange="renderMLDetail()"></select>
+    <div id="ml-detail"></div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -182,10 +207,11 @@ const ALGOS=[
 const STOCKS=["宁德时代","贵州茅台","比亚迪","中国平安","招商银行","隆基绿能","药明康德","长江电力"];
 const DEMO_RESULTS=PLACEHOLDER_RESULTS;
 const PRESETS=PLACEHOLDER_PRESETS;
+const ML_DATA=PLACEHOLDER_ML;
 
 let buySlots=[],sellSlots=[],chart=null;
 
-function init(){renderAlgos();renderStocks();renderPresets();renderCatalog()}
+function init(){renderAlgos();renderStocks();renderPresets();renderCatalog();renderML()}
 
 function renderAlgos(f=''){
   const el=document.getElementById('algo-list');const q=f.toLowerCase();
@@ -317,11 +343,117 @@ function renderCatalog(){
   }).join('');
 }
 
+function renderML(){
+  if(!ML_DATA||!ML_DATA.length)return;
+  var ft='<thead><tr style="border-bottom:2px solid var(--bd)">';
+  ft+='<th style="text-align:left;padding:10px 12px">因子模型</th>';
+  ft+='<th style="text-align:left;padding:10px 12px">层级</th>';
+  ft+='<th style="text-align:right;padding:10px 12px">融合权重</th>';
+  ft+='<th style="text-align:right;padding:10px 12px">平均IC</th>';
+  ft+='<th style="text-align:left;padding:10px 12px">IC评级</th></tr></thead><tbody>';
+  var factors=[
+    {name:'AlphaForge',lv:'L1',wt:'70%',ic:0.27},
+    {name:'TechPulse',lv:'L0',wt:'20%',ic:0.04},
+    {name:'Sentinel',lv:'L3',wt:'10%',ic:-0.10},
+    {name:'融合模型',lv:'Fusion',wt:'100%',ic:0.17}
+  ];
+  factors.forEach(function(f){
+    var cls=f.ic>=0.2?'pos':f.ic>=0?'neu':'neg';
+    var bar=Math.min(Math.abs(f.ic)/0.3*100,100);
+    ft+='<tr style="border-bottom:1px solid var(--bd)">';
+    ft+='<td style="padding:10px 12px;font-weight:600">'+f.name+'</td>';
+    ft+='<td style="padding:10px 12px;color:var(--a2);font-family:monospace">'+f.lv+'</td>';
+    ft+='<td style="padding:10px 12px;text-align:right">'+f.wt+'</td>';
+    ft+='<td style="padding:10px 12px;text-align:right;font-weight:600;color:'+(f.ic>=0?'var(--gn)':'var(--rd)')+'">'+(f.ic>=0?'+':'')+f.ic.toFixed(2)+'</td>';
+    ft+='<td style="padding:10px 12px"><div style="background:var(--sf);border-radius:4px;height:16px;width:120px;display:inline-block;vertical-align:middle"><div style="background:'+(f.ic>=0?'var(--gn)':'var(--rd)')+';height:100%;border-radius:4px;width:'+bar+'%"></div></div></td>';
+    ft+='</tr>';
+  });
+  ft+='</tbody>';
+  document.getElementById('ml-factor-table').innerHTML=ft;
+
+  var avgLS=0;ML_DATA.forEach(function(d){avgLS+=d.long_short});avgLS/=ML_DATA.length;
+  var yt='<thead><tr style="border-bottom:2px solid var(--bd)">';
+  yt+='<th style="text-align:left;padding:10px 12px">年份</th>';
+  ['TOP5收益','BOTTOM5收益','Long-Short','全市场','AlphaForge IC','TechPulse IC','Sentinel IC','Fusion IC'].forEach(function(h){
+    yt+='<th style="text-align:right;padding:10px 12px">'+h+'</th>';
+  });
+  yt+='</tr></thead><tbody>';
+  ML_DATA.forEach(function(d){
+    var l0Sum=0,l1Sum=0,l3Sum=0,fuSum=0,n=0;
+    Object.values(d.predictions).forEach(function(p){l0Sum+=p.l0;l1Sum+=p.l1;l3Sum+=p.l3;fuSum+=p.fusion;n++});
+    var l0Avg=l0Sum/n,l1Avg=l1Sum/n,l3Avg=l3Sum/n,fuAvg=fuSum/n;
+    yt+='<tr style="border-bottom:1px solid var(--bd)">';
+    yt+='<td style="padding:10px 12px;font-weight:600">'+d.year+'</td>';
+    yt+='<td style="padding:10px 12px;text-align:right;color:var(--gn)">'+(d.top5_ret>=0?'+':'')+d.top5_ret+'%</td>';
+    yt+='<td style="padding:10px 12px;text-align:right;color:'+(d.bottom5_ret>=0?'var(--gn)':'var(--rd)')+'">'+(d.bottom5_ret>=0?'+':'')+d.bottom5_ret+'%</td>';
+    yt+='<td style="padding:10px 12px;text-align:right;font-weight:700;color:'+(d.long_short>=0?'var(--gn)':'var(--rd)')+'">'+(d.long_short>=0?'+':'')+d.long_short+'%</td>';
+    yt+='<td style="padding:10px 12px;text-align:right;color:'+(d.all_ret>=0?'var(--gn)':'var(--rd)')+'">'+(d.all_ret>=0?'+':'')+d.all_ret+'%</td>';
+    [[l1Avg,'AlphaForge'],[l0Avg,'TechPulse'],[l3Avg,'Sentinel'],[fuAvg,'Fusion']].forEach(function(pair){
+      var v=pair[0];
+      yt+='<td style="padding:10px 12px;text-align:right;font-family:monospace;color:'+(v>=0?'var(--gn)':'var(--rd)')+'">'+(v>=0?'+':'')+v.toFixed(3)+'</td>';
+    });
+    yt+='</tr>';
+  });
+  yt+='<tr style="border-top:2px solid var(--bd);font-weight:700">';
+  yt+='<td style="padding:10px 12px">平均</td>';
+  yt+='<td style="padding:10px 12px;text-align:right">—</td><td style="padding:10px 12px;text-align:right">—</td>';
+  yt+='<td style="padding:10px 12px;text-align:right;color:var(--gn)">+'+avgLS.toFixed(2)+'%</td>';
+  yt+='<td style="padding:10px 12px;text-align:right">—</td>';
+  yt+='<td style="padding:10px 12px;text-align:right;color:var(--gn)">+0.27</td>';
+  yt+='<td style="padding:10px 12px;text-align:right;color:var(--gn)">+0.04</td>';
+  yt+='<td style="padding:10px 12px;text-align:right;color:var(--rd)">-0.10</td>';
+  yt+='<td style="padding:10px 12px;text-align:right;color:var(--gn)">+0.17</td>';
+  yt+='</tr></tbody>';
+  document.getElementById('ml-year-table').innerHTML=yt;
+
+  var sel=document.getElementById('ml-year-select');
+  ML_DATA.forEach(function(d,i){
+    var o=document.createElement('option');o.value=i;o.textContent=d.year+'年';sel.appendChild(o);
+  });
+  renderMLDetail();
+}
+function renderMLDetail(){
+  var idx=parseInt(document.getElementById('ml-year-select').value)||0;
+  var d=ML_DATA[idx];if(!d)return;
+  var preds=Object.entries(d.predictions).map(function(kv){return{code:kv[0],name:kv[1].name,l0:kv[1].l0,l1:kv[1].l1,l3:kv[1].l3,fusion:kv[1].fusion,ret:kv[1].actual_return}});
+  var sorted=preds.slice().sort(function(a,b){return b.fusion-a.fusion});
+  var top5=sorted.slice(0,5),bot5=sorted.slice(-5).reverse();
+
+  function mkTable(title,stocks,cls){
+    var h='<div style="margin-bottom:20px">';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+    h+='<span style="font-size:15px;font-weight:600">'+title+'</span>';
+    h+='<span style="font-size:12px;padding:2px 8px;border-radius:20px;background:'+(cls==='top'?'rgba(0,206,201,.15)':'rgba(255,107,107,.15)')+';color:'+(cls==='top'?'var(--gn)':'var(--rd)')+'">'+stocks.length+'只</span></div>';
+    h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">';
+    h+='<thead><tr style="border-bottom:2px solid var(--bd)">';
+    ['排名','代码','名称','TechPulse(L0)','AlphaForge(L1)','Sentinel(L3)','融合评分','实际收益'].forEach(function(t){
+      h+='<th style="text-align:'+(t==='排名'||t==='代码'||t==='名称'?'left':'right')+';padding:8px 10px;color:var(--dm)">'+t+'</th>';
+    });
+    h+='</tr></thead><tbody>';
+    stocks.forEach(function(s,i){
+      h+='<tr style="border-bottom:1px solid var(--bd)">';
+      h+='<td style="padding:8px 10px;color:var(--dm)">'+(i+1)+'</td>';
+      h+='<td style="padding:8px 10px;font-family:monospace">'+s.code+'</td>';
+      h+='<td style="padding:8px 10px;font-weight:600">'+s.name+'</td>';
+      h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l0>=0?'var(--gn)':'var(--rd)')+'">'+(s.l0>=0?'+':'')+s.l0.toFixed(3)+'</td>';
+      h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l1>=0?'var(--gn)':'var(--rd)')+'">'+(s.l1>=0?'+':'')+s.l1.toFixed(3)+'</td>';
+      h+='<td style="padding:8px 10px;text-align:right;font-family:monospace;color:'+(s.l3>=0?'var(--gn)':'var(--rd)')+'">'+(s.l3>=0?'+':'')+s.l3.toFixed(3)+'</td>';
+      h+='<td style="padding:8px 10px;text-align:right;font-weight:700;font-family:monospace;color:var(--a2)">'+s.fusion.toFixed(3)+'</td>';
+      if(s.ret!==null){h+='<td style="padding:8px 10px;text-align:right;font-weight:600;color:'+(s.ret>=0?'var(--gn)':'var(--rd)')+'">'+(s.ret>=0?'+':'')+s.ret+'%</td>'}
+      else{h+='<td style="padding:8px 10px;text-align:right;color:var(--dm)">N/A</td>'}
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+    return h;
+  }
+  document.getElementById('ml-detail').innerHTML=mkTable('🔥 TOP5 高分选股',top5,'top')+mkTable('❄️ BOTTOM5 低分选股',bot5,'bot');
+}
+
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(t,i){
-    t.classList.toggle('active',['build','presets','results','catalog'][i]===n);
+    t.classList.toggle('active',['build','presets','results','catalog','ml'][i]===n);
   });
-  ['build','presets','results','catalog'].forEach(function(id){
+  ['build','presets','results','catalog','ml'].forEach(function(id){
     document.getElementById('tab-'+id).style.display=id===n?'':'none';
   });
 }
@@ -334,6 +466,7 @@ init();
 # Inject the data
 html = html.replace('PLACEHOLDER_RESULTS', results_js)
 html = html.replace('PLACEHOLDER_PRESETS', presets_js)
+html = html.replace('PLACEHOLDER_ML', ml_js)
 
 out_path = f"{BASE}/docs/index.html"
 with open(out_path, 'w') as f:

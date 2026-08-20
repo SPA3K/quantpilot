@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "date": "2026-08-19T16:07:38.156386",
+    "model": "StructBERT",
+    "type": "Q2财报预测验证"
+  },
+  "results": {
+    "300750": {
+      "name": "宁德时代",
+      "report_date": "2026-07-25",
+      "result": "利润432.84亿,同比大增",
+      "news_count": 4,
+      "sentiment_mean": 0.597,
+      "sentiment_std": 0.157,
+      "predicted": "看涨 ↑",
+      "actual_1d": "+4.44%",
+      "actual_5d": "+3.21%",
+      "correct": "✅"
+    },
+    "600519": {
+      "name": "贵州茅台",
+      "report_date": "2026-08-15",
+      "result": "利润445.17亿,同比-1.95%",
+      "news_count": 37,
+      "sentiment_mean": -0.023,
+      "sentiment_std": 0.484,
+      "predicted": "中性 →",
+      "actual_1d": "-3.64%",
+      "actual_5d": "N/A",
+      "correct": "✅"
+    },
+    "688256": {
+      "name": "寒武纪",
+      "report_date": "2026-08-07",
+      "result": "利润23.11亿,同比+122.61%",
+      "news_count": 19,
+      "sentiment_mean": 0.277,
+      "sentiment_std": 0.354,
+      "predicted": "看涨 ↑",
+      "actual_1d": "-6.33%",
+      "actual_5d": "-8.91%",
+      "correct": "❌"
+    },
+    "600900": {
+      "name": "长江电力",
+      "report_date": "2026-07-16",
+      "result": "发电量+4.81%,分红0.79元/股",
+      "news_count": 13,
+      "sentiment_mean": 0.374,
+      "sentiment_std": 0.331,
+      "predicted": "看涨 ↑",
+      "actual_1d": "-1.53%",
+      "actual_5d": "+4.35%",
+      "correct": "❌"
+    }
+  }
+}

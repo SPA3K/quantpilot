@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "date": "2026-08-19T16:14:33.273875",
+    "type": "multi_level_earnings_prediction",
+    "models": [
+      "L0_factor",
+      "L2_gru",
+      "L2_lstm",
+      "L3_sentiment"
+    ],
+    "fusion_weights": [
+      0.25,
+      0.25,
+      0.25,
+      0.25
+    ]
+  },
+  "results": {
+    "300750": {
+      "name": "宁德时代",
+      "L0_factor": 0,
+      "L2_gru": 0.0,
+      "L2_lstm": 0.0,
+      "L3_sentiment": 0.597,
+      "fusion": 0.149,
+      "direction": "看涨 ↑",
+      "actual_1d": 4.44,
+      "correct": true
+    },
+    "600519": {
+      "name": "贵州茅台",
+      "L0_factor": 0.086,
+      "L2_gru": 0.0,
+      "L2_lstm": 0.0,
+      "L3_sentiment": -0.023,
+      "fusion": 0.016,
+      "direction": "中性 →",
+      "actual_1d": -3.64,
+      "correct": true
+    },
+    "688256": {
+      "name": "寒武纪",
+      "L0_factor": -0.442,
+      "L2_gru": 0.0,
+      "L2_lstm": 0.0,
+      "L3_sentiment": 0.277,
+      "fusion": -0.041,
+      "direction": "中性 →",
+      "actual_1d": -6.33,
+      "correct": true
+    },
+    "600900": {
+      "name": "长江电力",
+      "L0_factor": 0.132,
+      "L2_gru": 0.0,
+      "L2_lstm": 0.0,
+      "L3_sentiment": 0.374,
+      "fusion": 0.127,
+      "direction": "看涨 ↑",
+      "actual_1d": -1.53,
+      "correct": false
+    }
+  },
+  "accuracy": {
+    "L3_only": "2/4",
+    "fusion": "3/4"
+  }
+}
