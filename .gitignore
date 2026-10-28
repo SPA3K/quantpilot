@@ -38,3 +38,6 @@ autoresearch/experiments.log
 
 # 单股模型产物 + 本地权重缓存（按标的生成，体积大）
 models/
+
+# 行业监控 showcase 生成物（可由 _industry_showcase.py 重跑）
+industry_showcase.json
