@@ -41,3 +41,6 @@ models/
 
 # 行业监控 showcase 生成物（可由 _industry_showcase.py 重跑）
 industry_showcase.json
+
+# A股日线数据缓存（体积大，不入库）
+data/ml/
