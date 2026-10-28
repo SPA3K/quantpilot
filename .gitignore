@@ -30,3 +30,11 @@ cache/
 Thumbs.db
 *.log
 .ipynb_checkpoints/
+
+# 本地实验目录（每标的一个 *_autoresearch/，含真实标的缓存，不入库）
+*_autoresearch/
+autoresearch/data_cache.pkl
+autoresearch/experiments.log
+
+# 单股模型产物 + 本地权重缓存（按标的生成，体积大）
+models/

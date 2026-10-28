@@ -198,8 +198,11 @@ quantpilot/
 │   ├── algorithms/traditional/    # 🧱 12个DIY策略模块
 │   ├── core/backtest.py           # 📊 回测引擎
 │   ├── data/baostock_provider.py  # 📦 A股数据源（baostock）
+│   ├── data/tencent_provider.py   # 📦 腾讯行情数据源（港股/A股/美股）
+│   ├── single_stock/              # 🎯 单股模式（情感/内幕/事件日历）
 │   ├── api/                       # 🔗 策略API
 │   └── web/                       # 🌐 Web前端 + UI
+├── autoresearch/                  # 🔬 单股模型自动优化框架
 ├── docs/index.html                # GitHub Pages 演示
 ├── data/demo/                     # 离线演示数据集
 ├── scripts/                       # 工具脚本
@@ -241,6 +244,40 @@ quantpilot/
 | ⛔ 止损 | 达到最大亏损阈值时退出 |
 
 </details>
+
+---
+
+## 🎯 单股模式 — 为任何一只股票构建专属领航系统
+
+选股引擎回答「买什么」，单股模式回答「**我盯的这只，现在该怎么办**」。给定任意标的代码（港股/ A股/美股），自动集成六个信号源：
+
+| 信号 | 说明 |
+|------|------|
+| 📊 实时行情 | 腾讯行情 API，无需 API Key，港股/A股/美股通用 |
+| 📈 技术面 | MA / RSI / MACD / KDJ / 布林带自动计算 |
+| 📅 事件日历 | 财报日、产品发布、除权等关键节点，按影响力加权 |
+| 📰 新闻舆情 | 关键词情感打分（零依赖，内存受限环境可用）；进阶可接 StructBERT |
+| 🔒 内幕渠道 | 人机协作接口 — 你通过对话同步非公开信息，agent 写入本地文件供监控参考 |
+| 🤖 ML 信号 | 单股专属 L1/L2 模型（见下方 Autoresearch） |
+
+```bash
+# 监控任意标的
+python autoresearch/monitor.py sh600519     # A股
+python autoresearch/monitor.py hk00700      # 港股
+```
+
+**设计原则**：所有数据本地存储，不上传任何服务器；内幕渠道仅供内部参考。
+
+### 🔬 Autoresearch — 单股模型自动优化
+
+受 [karpathy/autoresearch](https://github.com/karpathy/autoresearch) 启发的 agent 自主实验框架：固定评估协议 + 单一优化指标（高信心子集准确率）+ 自主决定改什么。每晚自动运行多轮「改代码 → 训练 → 评估 → 保留或回滚」，白天留给行情任务。
+
+```bash
+export AUTORESEARCH_CODE=sh600519   # 指定要优化的标的
+cd autoresearch && python train.py  # 手动跑一轮
+```
+
+详见 [autoresearch/README.md](autoresearch/README.md)。
 
 ---
 
