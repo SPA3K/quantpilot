@@ -19,6 +19,7 @@
   <img src="https://img.shields.io/badge/ML-LightGBM-E91E63?style=flat&logo=scikit-learn&logoColor=white" alt="ML">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT">
   <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-Live-blue?style=flat" alt="Live Demo"></a>
+  <a href="https://github.com/SPA3K/quantpilot/actions/workflows/ci.yml"><img src="https://github.com/SPA3K/quantpilot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
 ---
@@ -36,6 +37,14 @@ QuantPilot is an AI investment decision system built for the **China A-share mar
 All three modes share the same factor engine (AlphaForge + TechPulse + Sentinel) — only the interface exposed to humans differs.
 
 **Cases first, project later** — real results from each mode below; architecture and usage come after.
+
+| **+33.7pp 4-yr excess** | **AlphaForge IC +0.27** | **60+ A-share factors** | **3 modes** | **MIT** | **Live Demo** |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| CSI 300 · 2023–2026 | L1 primary signal | trained on 2008–2022 full A-share | builder / single / sector | open source | zero-install |
+
+> ⚠️ **Positioning**: no stock tips, no limit-up predictions, no investment advice — QuantPilot is a research & decision-support tool. All numbers come from historical backtests; past performance does not predict future returns.
+
+**Contents**: [🏆 Real-World Cases](#-real-world-cases) · [📸 Screenshots](#-screenshots) · [🔧 Features & Architecture](#-project-introduction--usage) · [🚀 Quick Start](#-quick-start) · [🏗️ Structure](#️-project-structure) · [🤝 Contributing](#-contributing) · [⚠️ Disclaimer](#-disclaimer)
 
 ---
 
@@ -140,6 +149,16 @@ python autoresearch/monitor.py hk00700      # HK
 
 ---
 
+## 📸 Screenshots
+
+Live demo captures ([spa3k.github.io/quantpilot](https://spa3k.github.io/quantpilot/)) — click through to try it:
+
+|  |  |
+|---|---|
+| [![ML factor selection](screenshots/demo-ml.png)](https://spa3k.github.io/quantpilot/) **ML Factor Selection** 3-layer fusion picks, annual backtest performance, per-stock detail. | [![DIY strategy](screenshots/demo-diy.png)](https://spa3k.github.io/quantpilot/) **DIY Strategy** 12 drag-and-drop blocks, configure and run a backtest in one click. |
+
+---
+
 ## 🔧 Project Introduction & Usage
 
 ### ✨ Key Features
@@ -178,6 +197,14 @@ Score = 0.70 × AlphaForge + 0.20 × TechPulse + 0.10 × Sentinel
 > **AlphaForge** carries the dominant alpha signal (IC = +0.27). TechPulse provides supplementary momentum confirmation. Sentinel adds contrarian sentiment overlay.
 
 ### 🚀 Quick Start
+
+| You are | Start here |
+|---------|-----------|
+| Just exploring | Open the [Live Demo](https://spa3k.github.io/quantpilot/) — zero install |
+| Running your own backtest | `pip install` below → Python library usage |
+| Wiring an AI agent | MCP client config below |
+| Tracking one ticker | `python autoresearch/monitor.py sh600519` |
+| Hacking on the code | [Project Structure](#️-project-structure) + `pip install -e .` |
 
 **Install:**
 
@@ -347,6 +374,14 @@ PRs welcome! Areas of interest:
 - Data source integrations
 - Frontend improvements
 
+## ⚠️ Disclaimer
+
+This project is for **learning and quantitative research only** and **does not constitute investment advice**. Backtested results do not represent future returns; the A-share market carries risk. Data accuracy follows the official sources (baostock / Tencent quotes). The project **does not provide stock tips or limit-up predictions** — all signals are statistical presentations of historical patterns.
+
 ## 📄 License
 
-MIT
+MIT (see [LICENSE](LICENSE))
+
+---
+
+**⭐ Found it useful? A Star is the biggest support** · [Live Demo](https://spa3k.github.io/quantpilot/) · [中文 README](README.md)

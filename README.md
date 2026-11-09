@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/ML-LightGBM-E91E63?style=flat&logo=scikit-learn&logoColor=white" alt="ML">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT">
   <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-Live-blue?style=flat" alt="在线演示"></a>
+  <a href="https://github.com/SPA3K/quantpilot/actions/workflows/ci.yml"><img src="https://github.com/SPA3K/quantpilot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
 | **4年超额 +33.7pp** | **AlphaForge IC +0.27** | **60+ A股因子** | **3 种参与模式** | **MIT** | **在线 Demo** |
