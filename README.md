@@ -17,6 +17,12 @@
   <a href="https://spa3k.github.io/quantpilot/"><img src="https://img.shields.io/badge/Demo-Live-blue?style=flat" alt="在线演示"></a>
 </p>
 
+| **4年超额 +33.7pp** | **AlphaForge IC +0.27** | **60+ A股因子** | **3 种参与模式** | **MIT** | **在线 Demo** |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 沪深300 · 2023–2026 | L1 主力信号 | 2008–2022 全A训练 | 拼装/单股/行业 | 开源 | 零安装 |
+
+> ⚠️ **定位声明**：不荐股、不预测涨停、不构成投资建议——QuantPilot 是研究与决策辅助工具，所有数字来自历史回测，历史表现不代表未来收益。
+
 ---
 
 ## 📋 项目概述
@@ -32,6 +38,8 @@ QuantPilot 是一个专注于**中国A股市场**的AI投资决策系统。它�
 三种模式共用同一套因子引擎（AlphaForge + TechPulse + Sentinel），只是**暴露给人的界面不同**。
 
 **先看案例，再谈项目**——下面是三种模式各自的真实战绩，之后才讲架构与用法。
+
+**目录**：[🏆 实战案例](#-实战案例) · [📸 界面预览](#-界面预览) · [🔧 核心特性与架构](#-项目介绍与使用方法) · [🚀 快速开始](#-快速开始) · [🏗️ 项目结构](#️-项目结构) · [🤝 参与贡献](#-参与贡献) · [⚠️ 免责声明](#-免责声明)
 
 ---
 
@@ -132,6 +140,18 @@ python autoresearch/monitor.py hk00700      # 港股
 
 **🔬 Autoresearch — 单股模型自动优化**：受 [karpathy/autoresearch](https://github.com/karpathy/autoresearch) 启发的 agent 自主实验框架——固定评估协议 + 单一优化指标（高信心子集准确率）+ 自主决定改什么。每晚自动运行多轮「改代码 → 训练 → 评估 → 保留或回滚」，白天留给行情任务。详见 [autoresearch/README.md](autoresearch/README.md)。
 
+> **首期战役已收官（2026-10-28 → 11-06，round3→round57）**：最终基线 val **80.00%** / 高信心 test 准确率 **54.17%**（n=24）/ 方向收益 +0.096%；**KEEP 15 条**（6 条阻尼规则 + 4 个参数 + 5 次数据滚动刷新）、**ROLLBACK 6 条**，round33 后连续 24 轮无净提升 → 决定收官。完整结果与 5 条方法学沉淀见 [autoresearch/README.md](autoresearch/README.md)。
+
+---
+
+## 📸 界面预览
+
+在线 Demo 实拍（[spa3k.github.io/quantpilot](https://spa3k.github.io/quantpilot/)），点击图片直达体验：
+
+|  |  |
+|---|---|
+| [![ML因子选股](screenshots/demo-ml.png)](https://spa3k.github.io/quantpilot/) **ML 因子选股** 三层融合推荐、年度回测绩效与个股明细。 | [![DIY策略](screenshots/demo-diy.png)](https://spa3k.github.io/quantpilot/) **DIY 策略** 12 个拖拽积木拼策略，配置回测一键运行。 |
+
 ---
 
 ## 🔧 项目介绍与使用方法
@@ -172,6 +192,14 @@ QuantPilot 采用**三层加权融合**的异构因子模型架构：
 > **AlphaForge** 承载主要Alpha信号（IC = +0.27），TechPulse 提供动量确认补充，Sentinel 叠加逆向情绪信号。
 
 ### 🚀 快速开始
+
+| 你是 | 从哪开始 |
+|------|----------|
+| 只想体验 | 打开 [在线 Demo](https://spa3k.github.io/quantpilot/)，零安装 |
+| 想跑自己的回测 | 下方 `pip install` → Python 库用法 |
+| 想接 AI Agent | 下方 MCP 客户端配置 |
+| 盯一只票 | `python autoresearch/monitor.py sh600519` |
+| 想二次开发 | [项目结构](#️-项目结构) + `pip install -e .` |
 
 **安装：**
 
@@ -341,6 +369,14 @@ quantpilot/
 - 数据源集成扩展
 - 前端功能改进
 
+## ⚠️ 免责声明
+
+本项目仅供**学习与量化研究**，**不构成任何投资建议**。回测结果不代表未来收益，A 股有风险，入市需谨慎；数据准确性以数据源（baostock / 腾讯行情）官方为准。本项目**不提供荐股、不预测涨停**，所有信号仅为历史规律的统计呈现。
+
 ## 📄 开源协议
 
-MIT
+MIT（见 [LICENSE](LICENSE)）
+
+---
+
+**⭐ 觉得有用？点个 Star 就是最大的支持** · [在线 Demo](https://spa3k.github.io/quantpilot/) · [English README](README_EN.md)

@@ -136,6 +136,8 @@ python autoresearch/monitor.py hk00700      # HK
 
 **🔬 Autoresearch — per-ticker model optimization**: an agent-driven experiment framework inspired by [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — a fixed evaluation protocol + a single optimization metric (high-confidence subset accuracy) + the agent deciding on its own what to change. It runs multiple rounds of "edit code → train → evaluate → keep or roll back" every night, leaving daytime for market monitoring. See [autoresearch/README.md](autoresearch/README.md).
 
+> **First campaign completed (2026-10-28 → 11-06, round3→round57)**: final baseline val **80.00%** / high-confidence test accuracy **54.17%** (n=24) / directional return +0.096%; **15 KEEPs** (6 damping rules + 4 hyper-parameters + 5 data refreshes), **6 rollbacks**, and no net improvement for 24 rounds after round33 → campaign concluded. Full results and 5 reusable methodology lessons in [autoresearch/README.md](autoresearch/README.md).
+
 ---
 
 ## 🔧 Project Introduction & Usage
