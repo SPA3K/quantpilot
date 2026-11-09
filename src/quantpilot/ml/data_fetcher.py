@@ -261,10 +261,17 @@ class MLDataFetcher:
 
         if stock_codes is None:
             stock_list = self.fetch_stock_list()
-            # 只取A股主板（sh.6/sh.0/sz.0/sz.3）
-            stock_codes = stock_list[
-                stock_list["code"].str.match(r"^(sh\.6|sz\.0|sz\.3)")
-            ]["code"].tolist()
+            if "code" not in stock_list.columns or stock_list.empty:
+                # query_all_stock 当日无数据时：从已有 parquet 推导股票池（2026-11-05 补丁）
+                stock_codes = sorted(
+                    {p.stem.replace("_", ".", 1) for p in daily_dir.glob("*.parquet")}
+                )
+                logger.warning(f"stock list unavailable, derived {len(stock_codes)} codes from cache")
+            else:
+                # 只取A股主板（sh.6/sh.0/sz.0/sz.3）
+                stock_codes = stock_list[
+                    stock_list["code"].str.match(r"^(sh\.6|sz\.0|sz\.3)")
+                ]["code"].tolist()
 
         logger.info(f"Fetching daily bars for {len(stock_codes)} stocks, {start} to {end}")
 
